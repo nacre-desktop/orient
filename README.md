@@ -3,7 +3,7 @@
 <p align="center">Wallpaper colors. Readable palettes. Themes anywhere.</p>
 <p align="center"><a href="#try-it">Get started</a> · <a href="#what-it-does">Features</a> · <a href="#using-palettes-and-templates">Templates</a> · <a href="https://github.com/nacre-desktop/nacre">Nacre</a></p>
 
-**Development preview · 0.1.0-dev.2.** The engine works and has regression tests;
+**Development preview · 0.1.0-dev.3.** The engine works and has regression tests;
 its public packaging/API is being stabilized before a 1.0 release.
 
 Orient is a standalone Python library and CLI. It analyzes images or sampled
@@ -58,6 +58,6 @@ The engine uses a private XDG cache and never applies desktop settings. Use Nacr
 or another caller to publish a palette. Point samples, source regions/coverage and
 contrast/vision diagnostics are included for applications that build previews.
 
-Orient-owned code is **GPL-3.0-only**: [LICENSE](LICENSE). Pillow is an independently
+Orient-owned code is **MIT**: [LICENSE](LICENSE). Pillow is an independently
 installed dependency with its own license. Original synthetic regression images
 are public-domain fixtures. See [CHANGELOG](CHANGELOG.md) for user-facing changes.
