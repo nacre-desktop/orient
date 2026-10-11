@@ -1,0 +1,2 @@
+-- Load explicitly from your own Hyprland Lua config.
+hl.config({general={col={active_border={colors={"rgba({{primary}}ff)","rgba({{secondary}}ff)"},angle=45},inactive_border="rgba({{outlineVariant}}ff)"}}})

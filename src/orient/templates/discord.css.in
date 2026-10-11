@@ -1,0 +1,13 @@
+/* Optional user-theme client required; stock Discord has no CSS importer. */
+:root {
+ --background-primary: #{{surface}};
+ --background-secondary: #{{surfaceContainer}};
+ --background-tertiary: #{{surfaceContainerLowest}};
+ --text-normal: #{{onSurface}};
+ --text-muted: #{{onSurfaceVariant}};
+ --header-primary: #{{onSurface}};
+ --interactive-normal: #{{onSurfaceVariant}};
+ --interactive-active: #{{primary}};
+ --brand-500: #{{primary}};
+ --text-link: #{{blue}};
+}

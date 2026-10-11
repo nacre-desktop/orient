@@ -1,0 +1,10 @@
+/* Explicit GTK adapter; loading belongs to the user's desktop/configuration. */
+@define-color window_bg_color #{{surface}};
+@define-color window_fg_color #{{onSurface}};
+@define-color view_bg_color #{{surfaceContainerLowest}};
+@define-color view_fg_color #{{onSurface}};
+@define-color accent_bg_color #{{primary}};
+@define-color accent_fg_color #{{onPrimary}};
+@define-color accent_color #{{primary}};
+@define-color error_color #{{error}};
+@define-color success_color #{{success}};

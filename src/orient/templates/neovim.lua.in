@@ -1,0 +1,15 @@
+-- Load explicitly with :luafile; export does not edit your configuration.
+vim.opt.termguicolors = true
+local groups = {
+  Normal = {fg='#{{onSurface}}',bg='#{{surface}}'},
+  NormalFloat = {fg='#{{onSurface}}',bg='#{{surfaceContainer}}'},
+  Comment = {fg='#{{onSurfaceVariant}}',italic=true},
+  String = {fg='#{{green}}'},
+  Keyword = {fg='#{{primary}}'},
+  Function = {fg='#{{tertiary}}'},
+  Number = {fg='#{{secondary}}'},
+  Error = {fg='#{{onError}}',bg='#{{error}}'},
+  Visual = {fg='#{{onPrimaryContainer}}',bg='#{{primaryContainer}}'},
+  StatusLine = {fg='#{{onSurface}}',bg='#{{frame}}'}
+}
+for name, attributes in pairs(groups) do vim.api.nvim_set_hl(0,name,attributes) end

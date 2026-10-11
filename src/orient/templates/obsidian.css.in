@@ -1,0 +1,12 @@
+/* Enable this file in Obsidian's CSS snippets. */
+body.theme-dark, body.theme-light {
+  --background-primary: #{{surface}};
+  --background-secondary: #{{surfaceContainer}};
+  --text-normal: #{{onSurface}};
+  --text-muted: #{{onSurfaceVariant}};
+  --text-accent: #{{primary}};
+  --interactive-accent: #{{primary}};
+  --text-on-accent: #{{onPrimary}};
+  --text-error: #{{error}};
+  --color-green: #{{green}};
+}

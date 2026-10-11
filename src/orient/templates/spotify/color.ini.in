@@ -1,0 +1,17 @@
+; Optional Spicetify theme adapter; Spotify has no native palette importer.
+[Orient]
+text               = {{onSurface}}
+subtext            = {{onSurfaceVariant}}
+main               = {{surface}}
+sidebar            = {{surfaceContainerLowest}}
+player             = {{surfaceContainer}}
+card               = {{surfaceContainerHigh}}
+shadow             = {{shadow}}
+selected-row       = {{primaryContainer}}
+button             = {{primary}}
+button-active      = {{secondary}}
+button-disabled    = {{outline}}
+tab-active         = {{secondaryContainer}}
+notification       = {{primaryContainer}}
+notification-error = {{errorContainer}}
+misc               = {{tertiary}}
