@@ -1,6 +1,7 @@
-# Orient
-
-Wallpaper colors, readable palettes and portable theme templates.
+<p align="center"><img src="assets/branding/nacre-avatar-transparent.png" width="140" alt="Mother-of-pearl shell logo"></p>
+<h1 align="center">Orient</h1>
+<p align="center">Wallpaper colors. Readable palettes. Themes anywhere.</p>
+<p align="center"><a href="#try-it">Get started</a> · <a href="#what-it-does">Features</a> · <a href="#using-palettes-and-templates">Templates</a> · <a href="https://github.com/nacre-desktop/nacre">Nacre</a></p>
 
 **Development preview · 0.1.0-dev.2.** The engine works and has regression tests;
 its public packaging/API is being stabilized before a 1.0 release.
@@ -12,9 +13,11 @@ running desktop. [Nacre](https://github.com/nacre-desktop/nacre) is one consumer
 
 ## Try it
 
-Python 3.13+ is required. Install in an isolated environment:
+Python 3.13+ is required. Clone the source and install in an isolated environment:
 
 ```sh
+git clone https://github.com/nacre-desktop/orient.git
+cd orient
 python3 -m venv .venv
 .venv/bin/pip install .
 .venv/bin/orient palette wallpaper.jpg --personality natural --mode dark > palette.json
@@ -46,7 +49,7 @@ or stdout explicitly requested. Nacre owns live palette publication.
 
 The CLI prints JSON for palette/analyze/sample queries. Use `orient export` to
 write themes into the directory you select, or `orient render` for a template on
-stdout. JSON `formatVersion` is1; the engine version is independent. The built-in
+stdout. JSON `formatVersion` is 1; the engine version is independent. The built-in
 templates target terminals/editors and common desktop applications. Matugen color
 expressions, color-map loops and the supported filters/conditions work alongside
 Orient tokens; arbitrary scripts/includes are not executed.
