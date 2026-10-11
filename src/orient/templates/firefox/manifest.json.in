@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "version": "1.0.0",
+  "name": "Orient palette",
+  "theme": {"colors": {
+    "frame": "#{{frame}}", "tab_background_text": "#{{onSurface}}",
+    "toolbar": "#{{surfaceContainer}}", "toolbar_text": "#{{onSurface}}",
+    "toolbar_field": "#{{surface}}", "toolbar_field_text": "#{{onSurface}}",
+    "tab_selected": "#{{primaryContainer}}", "tab_text": "#{{onPrimaryContainer}}",
+    "icons": "#{{primary}}", "button_background_hover": "#{{secondaryContainer}}"
+  }}
+}

@@ -1,0 +1,12 @@
+[colors.primary]
+background = "#{{surface}}"
+foreground = "#{{onSurface}}"
+[colors.normal]
+black = "#{{term0}}"
+red = "#{{red}}"
+green = "#{{green}}"
+yellow = "#{{yellow}}"
+blue = "#{{blue}}"
+magenta = "#{{mauve}}"
+cyan = "#{{teal}}"
+white = "#{{onSurface}}"

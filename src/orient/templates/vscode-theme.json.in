@@ -1,0 +1,30 @@
+{
+  "name": "Orient",
+  "type": "{{mode}}",
+  "colors": {
+    "editor.background": "#{{surface}}",
+    "editor.foreground": "#{{onSurface}}",
+    "editorCursor.foreground": "#{{primary}}",
+    "editor.selectionBackground": "#{{primaryContainer}}",
+    "sideBar.background": "#{{surfaceContainerLowest}}",
+    "sideBar.foreground": "#{{onSurface}}",
+    "activityBar.background": "#{{surfaceContainerLow}}",
+    "activityBar.foreground": "#{{primary}}",
+    "statusBar.background": "#{{primaryContainer}}",
+    "statusBar.foreground": "#{{onPrimaryContainer}}",
+    "titleBar.activeBackground": "#{{frame}}",
+    "titleBar.activeForeground": "#{{onSurface}}",
+    "terminal.background": "#{{surface}}",
+    "terminal.foreground": "#{{onSurface}}",
+    "terminal.ansiRed": "#{{red}}",
+    "terminal.ansiGreen": "#{{green}}",
+    "terminal.ansiBlue": "#{{blue}}"
+  },
+  "tokenColors": [
+    {"scope": "comment", "settings": {"foreground": "#{{onSurfaceVariant}}"}},
+    {"scope": "string", "settings": {"foreground": "#{{green}}"}},
+    {"scope": "keyword", "settings": {"foreground": "#{{primary}}"}},
+    {"scope": "constant.numeric", "settings": {"foreground": "#{{secondary}}"}},
+    {"scope": "entity.name.function", "settings": {"foreground": "#{{tertiary}}"}}
+  ]
+}
