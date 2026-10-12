@@ -1,6 +1,7 @@
 # Maintainer: Nacre contributors <nacre-desktop@users.noreply.github.com>
 pkgname=python-orient-colors
-pkgver=0.1.0.dev5
+pkgver=0.1.0dev5
+_pyver=0.1.0.dev5
 pkgrel=1
 pkgdesc='Wallpaper colors, readable palettes and portable theme templates'
 arch=('any')
@@ -10,28 +11,28 @@ depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
 makedepends=('python-build' 'python-installer' 'python-hatchling')
 checkdepends=('ffmpeg')
 optdepends=('ffmpeg: video frame sampling')
-_tag="v${pkgver/.dev/-dev.}"
-source=("orient_colors-${pkgver}.tar.gz::${url}/releases/download/${_tag}/orient_colors-${pkgver}.tar.gz")
-sha256sums=('93930757fef1e8527e81a2a9bc437a901fd050d5a779afc8a2de4a260f615bcf')
+_tag="v${_pyver/.dev/-dev.}"
+source=("orient_colors-${_pyver}.tar.gz::${url}/releases/download/${_tag}/orient_colors-${_pyver}.tar.gz")
+sha256sums=('e1f3709f28a1b5469bd4d5f45c5ff7e4c7c30a813e376c60b6e4e3d6d26be51a')
 
 build() {
-  cd "orient_colors-${pkgver}"
+  cd "orient_colors-${_pyver}"
   python -m build --wheel --no-isolation
 }
 
 check() {
-  cd "orient_colors-${pkgver}"
+  cd "orient_colors-${_pyver}"
   PYTHONPATH=src python -m unittest discover -s tests
   # Install without network into an isolated prefix, then exercise the entry point
   # and package data rather than falling back to the source checkout.
   python -m venv --system-site-packages "${srcdir}/smoke-venv"
   "${srcdir}/smoke-venv/bin/python" -m installer dist/*.whl
   "${srcdir}/smoke-venv/bin/python" -I scripts/smoke_wheel.py \
-    "$PWD/tests/orient-gallery/images/coast-day.png" --version "$pkgver"
+    "$PWD/tests/orient-gallery/images/coast-day.png" --version "$_pyver"
 }
 
 package() {
-  cd "orient_colors-${pkgver}"
+  cd "orient_colors-${_pyver}"
   python -m installer --destdir="$pkgdir" dist/*.whl
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

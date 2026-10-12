@@ -63,7 +63,7 @@ jobs:
           cp packaging/arch/PKGBUILD dist/*.tar.gz "$RUNNER_TEMP/arch/"
           # PR validation uses this run's sdist, before GitHub release assets exist.
           # Only the source URL changes; the committed checksum is still verified.
-          sed -i 's|source=(.*|source=("orient_colors-${pkgver}.tar.gz")|' "$RUNNER_TEMP/arch/PKGBUILD"
+          sed -i 's|source=(.*|source=("orient_colors-${_pyver}.tar.gz")|' "$RUNNER_TEMP/arch/PKGBUILD"
           docker run --rm --privileged -v "$RUNNER_TEMP/arch:/work" archlinux:base-devel bash -euxc '
             pacman -Syu --noconfirm devtools sudo
             useradd -m builder

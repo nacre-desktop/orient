@@ -5,7 +5,7 @@
 - Isolated release branch from current main; palette/engine behavior remains unchanged.
 - PyPI and TestPyPI JSON APIs returned HTTP 404 for orient-colors (2026-10-12).
   No published project exists; pending registration/upload must confirm acceptance.
-- Arch package name: python-orient-colors; distribution/import/CLI names:
+- Arch package name: python-orient-colors (Arch 0.1.0dev5; Python 0.1.0.dev5); distribution/import/CLI names:
   orient-colors / orient / orient.
 - GitHub environments created: testpypi accepts version tags; pypi accepts version
   tags and requires Siverteh approval, with administrator bypass disabled.
@@ -30,3 +30,5 @@
 - Maintainer must create PyPI/TestPyPI accounts and configure pending Trusted
   Publishers: nacre-desktop/orient, publish.yml, respective pypi/testpypi environments.
 - Local sudo/devtools unavailable; use disposable CI clean-chroot builder.
+
+- Checked Arch ordering with vercmp: 0.1.0dev5 < 0.1.0, unlike dotted dev spelling.

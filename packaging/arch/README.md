@@ -11,8 +11,8 @@ an exact version when their tested integration requires one.
 The package builds with PEP 517 (`python-build`/Hatchling) and installs with
 `python-installer`. Pillow is required; FFmpeg is optional for users sampling
 video, and a check dependency for the video tests. No pip command runs in the
-package build, and no desktop session is required. `pkgver=0.1.0.dev5` preserves
-PEP 440 prerelease ordering. Rebuild on Arch Python minor upgrades.
+package build, and no desktop session is required. `pkgver=0.1.0dev5` sorts before final `0.1.0` with Arch vercmp;
+Python metadata/source archives keep the PEP 440 spelling `0.1.0.dev5`. Rebuild on Arch Python minor upgrades.
 
 Install `devtools`, then run from this directory:
 
