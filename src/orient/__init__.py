@@ -3,7 +3,7 @@
 import hashlib
 from pathlib import Path
 
-__version__ = "0.1.0.dev4"
+__version__ = "0.1.0.dev5"
 FORMAT_VERSION = 1
 _root = Path(__file__).parent
 _hash = hashlib.sha256()

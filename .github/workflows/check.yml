@@ -30,3 +30,6 @@ jobs:
           ruff check .
           python -m unittest discover -s tests
           python -m build
+
+  distributions:
+    uses: ./.github/workflows/distributions.yml
