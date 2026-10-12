@@ -64,8 +64,11 @@ jobs:
           # PR validation uses this run's sdist, before GitHub release assets exist.
           # Only the source URL changes; the committed checksum is still verified.
           sed -i 's|source=(.*|source=("orient_colors-${_pyver}.tar.gz")|' "$RUNNER_TEMP/arch/PKGBUILD"
-          docker run --rm --privileged -v "$RUNNER_TEMP/arch:/work" archlinux:base-devel bash -euxc '
+          docker run --rm --privileged --cgroupns=host --tmpfs /run --tmpfs /tmp \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v "$RUNNER_TEMP/arch:/work" \
+            archlinux:base-devel bash -euxc '
             pacman -Syu --noconfirm devtools sudo
+            systemd-machine-id-setup
             useradd -m builder
             printf "builder ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/builder
             chown -R builder:builder /work

@@ -29,6 +29,8 @@
 
 - Maintainer must create PyPI/TestPyPI accounts and configure pending Trusted
   Publishers: nacre-desktop/orient, publish.yml, respective pypi/testpypi environments.
-- Local sudo/devtools unavailable; use disposable CI clean-chroot builder.
+- First container-host chroot startup failed before package building: missing
+  machine ID and disk-backed /run. Add machine-id setup, tmpfs runtime dirs and
+  host cgroup namespace/mount; verify in CI. Native builder provides second check.
 
 - Checked Arch ordering with vercmp: 0.1.0dev5 < 0.1.0, unlike dotted dev spelling.
