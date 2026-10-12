@@ -30,7 +30,8 @@
 - Added README CLI/library usage, supported API, JSON formatVersion 1, 0.x
   versioning and release documentation. Engine/palette implementation unchanged;
   runtime source diff is only the package-version declaration.
-- [Nacre bump PR #6](https://github.com/nacre-desktop/nacre/pull/6) updates gitlink,
+- [Nacre bump PR #6](https://github.com/nacre-desktop/nacre/pull/6) merged as
+  `6b35c4e45b11aa50ace5d5784a2af1edcc72cb3f`. It updates gitlink,
   lock, exact Python dependency and one startup fingerprint line. All colors and
   presets unchanged. Rebased local 616 tests and native/source checks passed;
   [CI 38248577511](https://github.com/nacre-desktop/nacre/actions/runs/38248577511)
@@ -50,9 +51,11 @@ canonical CI sdist rather than a locally rebuilt archive.
 
 ## Next
 
-- Merge [Orient PR #2](https://github.com/nacre-desktop/orient/pull/2) after final
-  checkpoint CI. The release tag remains at its tested immutable revision.
-- Nacre PR #6 is ready for integration review/merge; no desktop deployment.
+Maintainer may review the release artifacts and approve production PyPI when
+ready. Release implementation/checkpoint review is tracked through
+[Orient PR #2](https://github.com/nacre-desktop/orient/pull/2); the release tag
+remains at the tested immutable revision above. No desktop deployment is part of
+this release task.
 
 ## Open questions / maintainer decisions
 
