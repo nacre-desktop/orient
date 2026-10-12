@@ -42,6 +42,14 @@ jobs:
   distributions:
     needs: version
     uses: ./.github/workflows/distributions.yml
+  github-release:
+    needs: distributions
+    uses: ./.github/workflows/release.yml
+    permissions:
+      contents: write
+      actions: read
+    with:
+      tag: ${{ github.ref_name }}
   testpypi:
     needs: distributions
     runs-on: ubuntu-24.04
@@ -88,7 +96,7 @@ jobs:
           "$RUNNER_TEMP/testpypi/bin/python" -I scripts/smoke_wheel.py \
             "$PWD/tests/orient-gallery/images/coast-day.png" --version "$VERSION"
   pypi:
-    needs: [distributions, testpypi-install]
+    needs: [distributions, github-release, testpypi-install]
     runs-on: ubuntu-24.04
     environment:
       name: pypi

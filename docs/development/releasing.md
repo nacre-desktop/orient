@@ -48,9 +48,12 @@ allows immutable existing files to be skipped. Never overwrite an existing tag o
 version. A TestPyPI setup failure can be retried after the pending publisher is
 configured. A manual dispatch is permitted only with an existing version tag.
 
-Run the existing `release.yml` workflow on the same tag to attach the sdist/wheel
-as a GitHub prerelease; the Arch source URL points to that attached sdist.
-Verify its digest matches `packaging/arch/PKGBUILD`.
+`publish.yml` also calls `release.yml` to attach the **same tested artifacts**
+as a GitHub release (prerelease for development tags). The Arch source URL points
+to that sdist and its digest is verified against the recipe. Do not rebuild
+release archives on another toolchain: compressed bytes can differ even when
+contents match. For manual recovery, dispatch `release.yml` with the tag and
+original publishing run ID; it downloads and verifies existing artifacts.
 
 ## Fresh TestPyPI installation
 
