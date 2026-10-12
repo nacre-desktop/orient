@@ -2,43 +2,61 @@
 
 ## Done
 
-- Isolated release branch from current main; palette/engine behavior remains unchanged.
-- PyPI and TestPyPI JSON APIs returned HTTP 404 for orient-colors (2026-10-12).
-  No published project exists; pending registration/upload must confirm acceptance.
-- Arch package name: python-orient-colors (Arch 0.1.0dev5; Python 0.1.0.dev5); distribution/import/CLI names:
-  orient-colors / orient / orient.
-- GitHub environments created: testpypi accepts version tags; pypi accepts version
-  tags and requires Siverteh approval, with administrator bypass disabled.
+- Released immutable tag `v0.1.0-dev.5` at
+  `6ee17843647250b45f75dc229ab02688a6450bc2`.
+- PyPI/TestPyPI initially returned 404 for `orient-colors` (2026-10-12).
+  The maintainer configured both pending publishers; TestPyPI accepted the name
+  and created the project through Trusted Publishing. No stored API tokens.
+- [TestPyPI 0.1.0.dev5](https://test.pypi.org/project/orient-colors/0.1.0.dev5/)
+  published. Fresh index installs and all CLI/library/template smoke checks passed
+  on Python 3.13/3.14 in CI, and Python 3.14.7 locally.
+- [Release workflow 38248389874](https://github.com/nacre-desktop/orient/actions/runs/38248389874)
+  completed build, wheel smoke, Arch clean-chroot build, TestPyPI publication and
+  TestPyPI installation jobs. Production `pypi` job is waiting for Siverteh review;
+  tag-only environment policy and administrator bypass disabled were verified.
+- [GitHub release](https://github.com/nacre-desktop/orient/releases/tag/v0.1.0-dev.5)
+  includes the tested sdist, wheel and clean-chroot Arch package.
+- Arch package: **python-orient-colors 0.1.0dev5-1**. Python package:
+  **orient-colors 0.1.0.dev5**; import/CLI: **orient**. Arch's undotted dev suffix
+  was verified with vercmp to sort before final 0.1.0. Recipe/.SRCINFO in
+  `packaging/arch/`; final name and versions shared with Nacre packager via PR.
+- Native final stock-Arch clean-chroot build also passed all 57 tests and the
+  installed-wheel smoke. Namcap had no errors; its entry-point module lookup
+  warning remains documented in validation evidence.
+- [Candidate CI 38247953341](https://github.com/nacre-desktop/orient/actions/runs/38247953341)
+  passed all seven checks: three Python/Pillow engine combinations, distribution
+  build, two clean wheel environments and Arch. Ruff lint/format, strict Twine,
+  actionlint and local 57-test suite passed. All 13 bundled templates verified.
+- Added README CLI/library usage, supported API, JSON formatVersion 1, 0.x
+  versioning and release documentation. Engine/palette implementation unchanged;
+  runtime source diff is only the package-version declaration.
+- [Nacre bump PR #6](https://github.com/nacre-desktop/nacre/pull/6) updates gitlink,
+  lock, exact Python dependency and one startup fingerprint line. All colors and
+  presets unchanged. Rebased local 616 tests and native/source checks passed;
+  [CI 38248577511](https://github.com/nacre-desktop/nacre/actions/runs/38248577511)
+  passed including JavaScript formatting.
 
-- Added tokenless tag-driven publishing and reusable distribution checks, including
-  clean wheel installs on Python 3.13/3.14 and Arch devtools clean-chroot CI.
-- Added CLI/library/API/JSON/versioning/release docs and Arch recipe.
-- Local Python 3.14.7: 57 tests, Ruff lint/format, sdist-to-wheel build, strict
-  Twine metadata checks and installed-wheel CLI/library smoke passed (13 templates).
+## Artifact identity
+
+GitHub and both indexes reuse the same tested Python artifacts. Local and Ubuntu
+compression differed despite identical archive contents, so Arch pins the
+canonical CI sdist rather than a locally rebuilt archive.
+
+- sdist SHA-256: `58ec261d8c0d5888796ff46775f243dbfa6a11253ea9fa4f97bc65c57aba5b8b`
+- wheel SHA-256: `f45f7fa03e554e0514f967d394497cfcc72d0f6cfbd9f6af64c479c3c0991553`
+- TestPyPI JSON API digests matched both artifacts independently.
+- Progress notes and Arch packaging are excluded from the sdist, avoiding a
+  self-referencing checksum. Changes to included source/docs require a new build.
 
 ## Next
 
-- Build/check distributions, installed wheel CLI smoke on Python 3.13 and 3.14.
-- Add user/API/JSON/versioning/release documentation and Arch recipe.
-- Validate Arch recipe in a clean chroot and coordinate its name/artifact with Nacre packaging.
-- Open one Orient PR, release tag v0.1.0-dev.5, publish and install from TestPyPI.
-- Leave production PyPI job waiting for maintainer approval.
-- Open one minimal Nacre PR updating the Orient submodule and its matching pin.
+- Merge [Orient PR #2](https://github.com/nacre-desktop/orient/pull/2) after final
+  checkpoint CI. The release tag remains at its tested immutable revision.
+- Nacre PR #6 is ready for integration review/merge; no desktop deployment.
 
-## Open questions
+## Open questions / maintainer decisions
 
-- Maintainer must create PyPI/TestPyPI accounts and configure pending Trusted
-  Publishers: nacre-desktop/orient, publish.yml, respective pypi/testpypi environments.
-- First container-host chroot startup failed before package building: missing
-  machine ID and disk-backed /run. Add machine-id setup, tmpfs runtime dirs and
-  host cgroup namespace/mount. Devtools also assigns systemd slices, requiring
-  systemd as PID 1 in the container host; verify that startup in CI.
-- Native stock-Arch clean chroot passed 57 tests, wheel smoke and package build;
-  namcap reports only an entry-point module lookup warning (no errors).
-- Maintainer reports both pending publishers configured.
-
-- Checked Arch ordering with vercmp: 0.1.0dev5 < 0.1.0, unlike dotted dev spelling.
-
-- Canonical CI archive from run 38247690829 pinned for Arch. Local/CI archive
-  contents matched, but compression differed; GitHub and both indexes now reuse
-  the original tested artifacts rather than rebuilding release downloads.
+- Production PyPI publication intentionally remains pending approval at the
+  linked release workflow. This task does not approve it.
+- The Arch recipe/package is available from this repository/release; AUR or
+  official Arch repository submission is a separate distribution decision.
