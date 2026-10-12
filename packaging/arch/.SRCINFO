@@ -14,6 +14,6 @@ pkgbase = python-orient-colors
 	depends = python-pillow<13
 	optdepends = ffmpeg: video frame sampling
 	source = orient_colors-0.1.0.dev5.tar.gz::https://github.com/nacre-desktop/orient/releases/download/v0.1.0-dev.5/orient_colors-0.1.0.dev5.tar.gz
-	sha256sums = e1f3709f28a1b5469bd4d5f45c5ff7e4c7c30a813e376c60b6e4e3d6d26be51a
+	sha256sums = 58ec261d8c0d5888796ff46775f243dbfa6a11253ea9fa4f97bc65c57aba5b8b
 
 pkgname = python-orient-colors

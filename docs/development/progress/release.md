@@ -38,3 +38,7 @@
 - Maintainer reports both pending publishers configured.
 
 - Checked Arch ordering with vercmp: 0.1.0dev5 < 0.1.0, unlike dotted dev spelling.
+
+- Canonical CI archive from run 38247690829 pinned for Arch. Local/CI archive
+  contents matched, but compression differed; GitHub and both indexes now reuse
+  the original tested artifacts rather than rebuilding release downloads.
