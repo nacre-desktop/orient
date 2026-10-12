@@ -1,0 +1,79 @@
+name: Distribution checks
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
+      - name: Build sdist and wheel from sdist; check metadata
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install . build twine ruff==0.16.10
+          ruff format --check .
+          ruff check .
+          python -m unittest discover -s tests
+          python -m build
+          python -m twine check --strict dist/*
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-distributions
+          path: dist/*
+          if-no-files-found: error
+  smoke:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ["3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-distributions
+          path: dist
+      - name: Install wheel in clean venv and exercise CLI/library/templates
+        run: |
+          python -m venv "$RUNNER_TEMP/smoke"
+          "$RUNNER_TEMP/smoke/bin/python" -m pip install dist/*.whl
+          version=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          "$RUNNER_TEMP/smoke/bin/python" -I scripts/smoke_wheel.py \
+            "$PWD/tests/orient-gallery/images/coast-day.png" --version "$version"
+  arch:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-distributions
+          path: dist
+      - name: Build with Arch devtools in a clean chroot
+        run: |
+          mkdir "$RUNNER_TEMP/arch"
+          cp packaging/arch/PKGBUILD dist/*.tar.gz "$RUNNER_TEMP/arch/"
+          # PR validation uses this run's sdist, before GitHub release assets exist.
+          # Only the source URL changes; the committed checksum is still verified.
+          sed -i 's|source=(.*|source=("orient_colors-${pkgver}.tar.gz")|' "$RUNNER_TEMP/arch/PKGBUILD"
+          docker run --rm --privileged -v "$RUNNER_TEMP/arch:/work" archlinux:base-devel bash -euxc '
+            pacman -Syu --noconfirm devtools sudo
+            useradd -m builder
+            printf "builder ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/builder
+            chown -R builder:builder /work
+            cd /work
+            sudo -u builder extra-x86_64-build
+          '
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: arch-package
+          path: ${{ runner.temp }}/arch/*.pkg.tar.zst
+          if-no-files-found: error

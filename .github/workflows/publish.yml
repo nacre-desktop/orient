@@ -1,0 +1,105 @@
+name: Publish Python distributions
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Validate version tag and all version declarations
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          python - <<'PY'
+          import ast, os, pathlib, re, tomllib
+          if os.environ["REF_TYPE"] != "tag":
+              raise SystemExit("Dispatch this workflow on a version tag, not a branch")
+          version = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"]
+          public = pathlib.Path("VERSION").read_text().strip()
+          if not re.fullmatch(r"0\.\d+\.\d+(?:\.dev\d+)?", version):
+              raise SystemExit("Only 0.x stable/development versions are supported")
+          if public != version.replace(".dev", "-dev.") or os.environ["RELEASE_TAG"] != "v" + public:
+              raise SystemExit("Tag, VERSION and project metadata must agree")
+          tree = ast.parse(pathlib.Path("src/orient/__init__.py").read_text())
+          runtime = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign)
+                         and any(isinstance(t, ast.Name) and t.id == "__version__" for t in n.targets))
+          if runtime != version:
+              raise SystemExit("Runtime version must agree with metadata")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
+              stream.write("version=" + version + "\n")
+          PY
+  distributions:
+    needs: version
+    uses: ./.github/workflows/distributions.yml
+  testpypi:
+    needs: distributions
+    runs-on: ubuntu-24.04
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/orient-colors
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+  testpypi-install:
+    needs: [version, testpypi]
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ["3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Fresh install from TestPyPI and smoke test
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          python -m venv "$RUNNER_TEMP/testpypi"
+          # Dependencies come from PyPI; Orient comes exclusively from TestPyPI.
+          "$RUNNER_TEMP/testpypi/bin/python" -m pip install 'pillow>=11,<13'
+          for attempt in 1 2 3 4 5; do
+            if "$RUNNER_TEMP/testpypi/bin/python" -m pip install --no-cache-dir --no-deps \
+              --only-binary=:all: --index-url https://test.pypi.org/simple/ "orient-colors==$VERSION"; then
+              break
+            fi
+            test "$attempt" -lt 5 || exit 1
+            sleep 10
+          done
+          "$RUNNER_TEMP/testpypi/bin/python" -I scripts/smoke_wheel.py \
+            "$PWD/tests/orient-gallery/images/coast-day.png" --version "$VERSION"
+  pypi:
+    needs: [distributions, testpypi-install]
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/p/orient-colors
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          skip-existing: true

@@ -10,6 +10,12 @@
 - GitHub environments created: testpypi accepts version tags; pypi accepts version
   tags and requires Siverteh approval, with administrator bypass disabled.
 
+- Added tokenless tag-driven publishing and reusable distribution checks, including
+  clean wheel installs on Python 3.13/3.14 and Arch devtools clean-chroot CI.
+- Added CLI/library/API/JSON/versioning/release docs and Arch recipe.
+- Local Python 3.14.7: 57 tests, Ruff lint/format, sdist-to-wheel build, strict
+  Twine metadata checks and installed-wheel CLI/library smoke passed (13 templates).
+
 ## Next
 
 - Build/check distributions, installed wheel CLI smoke on Python 3.13 and 3.14.
