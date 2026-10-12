@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-dev.5
+
+Add tokenless TestPyPI-first publishing with a protected production approval gate,
+installed-wheel checks on Python 3.13/3.14, and the python-orient-colors Arch recipe
+with clean-chroot validation. Document CLI/library entry points, palette JSON
+format 1, and the 0.x compatibility policy. Palette and engine behavior is unchanged.
+
 ## 0.1.0-dev.4
 
 Support Pillow 11 and 12 without forcing library users to one patch version.

@@ -1,13 +1,23 @@
-name: Publish development preview
+name: Publish GitHub release artifacts
 on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing tested development tag
+        description: Existing tested version tag
+        required: true
+        type: string
+      run_id:
+        description: Publish Python distributions run containing the tested artifacts
         required: true
         type: string
 permissions:
   contents: write
+  actions: read
 jobs:
   release:
     runs-on: ubuntu-24.04
@@ -15,42 +25,56 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       RELEASE_TAG: ${{ inputs.tag }}
+      PUBLISH_RUN_ID: ${{ inputs.run_id }}
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ inputs.tag }}
-          submodules: recursive
       - name: Verify version tag
         run: |
           python - <<'PY'
           import os, pathlib, re
           tag = os.environ["RELEASE_TAG"]
-          if not re.fullmatch(r"v0[.][0-9]+[.][0-9]+-dev[.][0-9]+", tag):
-              raise SystemExit("Only development-preview tags can be published")
+          if not re.fullmatch(r"v0[.][0-9]+[.][0-9]+(?:-dev[.][0-9]+)?", tag):
+              raise SystemExit("Only 0.x version tags can be published")
           if tag != "v" + pathlib.Path("VERSION").read_text().strip():
               raise SystemExit("Tag and source VERSION disagree")
           PY
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        if: github.event_name != 'workflow_dispatch'
         with:
-          python-version: "3.13"
-      - name: Build Python package
+          name: python-distributions
+          path: dist
+      - name: Download the same tested artifacts for a manual recovery
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          python -m pip install build
-          python -m build
-      - name: Publish prerelease
+          test "$(gh run view "$PUBLISH_RUN_ID" --json headSha --jq .headSha)" = "$(git rev-parse HEAD)"
+          test "$(gh run view "$PUBLISH_RUN_ID" --json workflowName --jq .workflowName)" = "Publish Python distributions"
+          gh run download "$PUBLISH_RUN_ID" --name python-distributions --dir dist
+      - name: Verify Arch source digest and publish GitHub artifacts
         run: |
-          python - <<'PYTHON'
-          import os, pathlib, re
+          python - <<'PY'
+          import hashlib, os, pathlib, re
           version = os.environ["RELEASE_TAG"].removeprefix("v")
+          pyver = version.replace("-dev.", ".dev")
+          source = pathlib.Path("dist") / ("orient_colors-" + pyver + ".tar.gz")
+          recipe = pathlib.Path("packaging/arch/PKGBUILD").read_text()
+          digest = re.search(r"sha256sums=\('([a-f0-9]{64})'\)", recipe).group(1)
+          if hashlib.sha256(source.read_bytes()).hexdigest() != digest:
+              raise SystemExit("Release sdist must match the Arch source checksum")
           changelog = pathlib.Path("CHANGELOG.md").read_text()
           match = re.search(r"^## " + re.escape(version) + r"\s*\n(.*?)(?=^## |\Z)", changelog, re.M | re.S)
           if not match or not match.group(1).strip():
               raise SystemExit("Changelog entry missing for " + version)
-          notes = "Development preview; installation and packaging are still being refined.\n\n" + match.group(1).strip() + "\n"
-          pathlib.Path("/tmp/release-notes.md").write_text(notes)
-          PYTHON
+          pathlib.Path("/tmp/release-notes.md").write_text(match.group(1).strip() + "\n")
+          PY
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            mkdir /tmp/existing-release
+            gh release download "$RELEASE_TAG" --dir /tmp/existing-release --pattern '*.whl' --pattern '*.tar.gz'
+            for artifact in dist/*; do cmp "$artifact" "/tmp/existing-release/$(basename "$artifact")"; done
             gh release edit "$RELEASE_TAG" --notes-file /tmp/release-notes.md
-          else
+          elif [[ "$RELEASE_TAG" == *-dev.* ]]; then
             gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz --verify-tag --prerelease --latest=false --title "$RELEASE_TAG" --notes-file /tmp/release-notes.md
+          else
+            gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz --verify-tag --latest=false --title "$RELEASE_TAG" --notes-file /tmp/release-notes.md
           fi
