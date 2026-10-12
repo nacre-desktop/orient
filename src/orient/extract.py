@@ -207,7 +207,7 @@ def analyze(path):
     bins = {}
     total = 0.0
     for image in images:
-        pixels = list(image.get_flattened_data())
+        pixels = list((image.get_flattened_data() if hasattr(image, "get_flattened_data") else image.getdata()))
         for i, (r, g, b, alpha) in enumerate(pixels):
             if alpha == 0:
                 continue

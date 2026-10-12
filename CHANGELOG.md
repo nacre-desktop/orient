@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.4
+
+Support Pillow 11 and 12 without forcing library users to one patch version.
+Document the independent implementation and its historical integration context.
+
 ## 0.1.0-dev.3
 
 Orient-owned source is now MIT-licensed for reuse in other desktops, libraries and

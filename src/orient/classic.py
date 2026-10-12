@@ -19,7 +19,9 @@ def analyze(path):
     image = images[0]
     bins = {}
     total = 0.0
-    for i, (r, g, b, alpha) in enumerate(image.get_flattened_data()):
+    for i, (r, g, b, alpha) in enumerate(
+        (image.get_flattened_data() if hasattr(image, "get_flattened_data") else image.getdata())
+    ):
         if alpha == 0:
             continue
         weight = alpha / 255
