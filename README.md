@@ -64,3 +64,6 @@ are public-domain fixtures. See [CHANGELOG](CHANGELOG.md) for user-facing change
 
 The earlier integration used GPL-licensed Caelestia tooling; the standalone engine
 is an independent implementation. See the [implementation-origin record](docs/provenance.md).
+
+For development checks and PR expectations, see [Contributing](CONTRIBUTING.md).
+Report vulnerabilities through the private channel in [Security](SECURITY.md).

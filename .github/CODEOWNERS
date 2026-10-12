@@ -1,0 +1,10 @@
+# Default ownership also catches any newly introduced installer/sudo path.
+* @Siverteh
+
+# Automation, package execution/dependencies, parsing and file-write boundaries.
+/.github/ @Siverteh
+/pyproject.toml @Siverteh
+/src/orient/extract.py @Siverteh
+/src/orient/template_engine.py @Siverteh
+/src/orient/storage.py @Siverteh
+/src/orient/export.py @Siverteh

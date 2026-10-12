@@ -1,0 +1,68 @@
+name: Hardware compatibility report
+description: Share tested Orient compatibility and device-specific problems.
+title: "[Hardware]: "
+labels:
+  - hardware
+body:
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware and software
+      description:
+        Device/model, CPU architecture, OS/kernel, Python/Pillow and FFmpeg versions, memory,
+        and power source if relevant. Orient does not require a GPU or compositor; include consumer/session
+        details only if they affect the reproduction. Omit serial numbers and unique identifiers.
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: Orient version and installation
+      description: Version/commit, installation method and any relevant non-private configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps or commands tested
+      description:
+        Describe a repeatable test and relevant settings. For Orient, include image/animation
+        properties and palette/sampling options.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What should work on this hardware?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result and compatibility
+      description:
+        State what works, what fails and what remains untested. Include sanitized errors or measurements
+        with units and measurement method.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reproduction evidence
+      description:
+        Include a shareable input or synthetic reproduction, exact CLI/Python invocation and
+        relevant palette JSON or export output. If reporting performance, give input size/frame count, elapsed
+        time and comparable before/after conditions.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workarounds and limitations
+      description:
+        "Optional: safe changes tried and their result. Do not disable protection or upload private
+        settings."
+    validations:
+      required: false
