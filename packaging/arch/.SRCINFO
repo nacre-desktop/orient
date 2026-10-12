@@ -1,0 +1,19 @@
+pkgbase = python-orient-colors
+	pkgdesc = Wallpaper colors, readable palettes and portable theme templates
+	pkgver = 0.1.0dev5
+	pkgrel = 1
+	url = https://github.com/nacre-desktop/orient
+	arch = any
+	license = MIT
+	checkdepends = ffmpeg
+	makedepends = python-build
+	makedepends = python-installer
+	makedepends = python-hatchling
+	depends = python>=3.13
+	depends = python-pillow>=11
+	depends = python-pillow<13
+	optdepends = ffmpeg: video frame sampling
+	source = orient_colors-0.1.0.dev5.tar.gz::https://github.com/nacre-desktop/orient/releases/download/v0.1.0-dev.5/orient_colors-0.1.0.dev5.tar.gz
+	sha256sums = e1f3709f28a1b5469bd4d5f45c5ff7e4c7c30a813e376c60b6e4e3d6d26be51a
+
+pkgname = python-orient-colors

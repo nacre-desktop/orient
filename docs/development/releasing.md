@@ -23,7 +23,7 @@ names alone do not enforce approval. Never approve production through automation
    `src/orient/__init__.py`, `VERSION`, the README preview link and CHANGELOG.
 2. Run the CONTRIBUTING lint/tests and `python -m build` (wheel built from sdist),
    then `python -m twine check --strict dist/*`.
-3. Update the Arch `pkgver`, source SHA-256 and `.SRCINFO` from that sdist. The
+3. Update the Arch `pkgver` (e.g. `0.1.0dev5`), `_pyver` (`0.1.0.dev5`), source SHA-256 and `.SRCINFO` from that sdist. The
    sdist excludes Arch packaging and the progress note to avoid a self-referencing
    checksum. Any included source/doc change requires rebuilding and a new checksum.
 4. CI installs the built wheel in fresh Python 3.13/3.14 venvs, runs
