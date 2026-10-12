@@ -31,6 +31,10 @@
   Publishers: nacre-desktop/orient, publish.yml, respective pypi/testpypi environments.
 - First container-host chroot startup failed before package building: missing
   machine ID and disk-backed /run. Add machine-id setup, tmpfs runtime dirs and
-  host cgroup namespace/mount; verify in CI. Native builder provides second check.
+  host cgroup namespace/mount. Devtools also assigns systemd slices, requiring
+  systemd as PID 1 in the container host; verify that startup in CI.
+- Native stock-Arch clean chroot passed 57 tests, wheel smoke and package build;
+  namcap reports only an entry-point module lookup warning (no errors).
+- Maintainer reports both pending publishers configured.
 
 - Checked Arch ordering with vercmp: 0.1.0dev5 < 0.1.0, unlike dotted dev spelling.
