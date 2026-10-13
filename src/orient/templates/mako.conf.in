@@ -1,0 +1,11 @@
+# Docs: https://github.com/emersion/mako/blob/master/doc/mako.5.scd
+# Merge into your config; criteria sections must come after global settings.
+background-color=#{{surface}}
+text-color=#{{onSurface}}
+border-color=#{{primary}}
+progress-color=over #{{primaryContainer}}
+
+[urgency=high]
+background-color=#{{errorContainer}}
+text-color=#{{onErrorContainer}}
+border-color=#{{error}}

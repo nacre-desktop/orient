@@ -1,0 +1,17 @@
+/* Docs: https://github.com/Alexays/Waybar/wiki/Styling
+   Import after layout CSS; more specific existing selectors may override these colors. */
+window#waybar {
+    background-color: #{{surface}};
+    color: #{{onSurface}};
+}
+#workspaces button { color: #{{onSurfaceVariant}}; }
+#workspaces button.active, #workspaces button.focused {
+    background-color: #{{primaryContainer}};
+    color: #{{onPrimaryContainer}};
+}
+#workspaces button.urgent, #battery.critical {
+    background-color: #{{errorContainer}};
+    color: #{{onErrorContainer}};
+}
+#clock, #battery, #network, #pulseaudio { color: #{{onSurface}}; }
+tooltip { background-color: #{{surfaceContainer}}; color: #{{onSurface}}; }

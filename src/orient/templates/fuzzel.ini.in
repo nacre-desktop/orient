@@ -1,0 +1,13 @@
+# Docs: https://codeberg.org/dnkl/fuzzel/src/branch/master/doc/fuzzel.ini.5.scd
+# Fuzzel uses RRGGBBAA without a leading hash.
+[colors]
+background={{surface}}ff
+text={{onSurface}}ff
+prompt={{primary}}ff
+placeholder={{onSurfaceVariant}}ff
+input={{onSurface}}ff
+match={{primary}}ff
+selection={{primaryContainer}}ff
+selection-text={{onPrimaryContainer}}ff
+selection-match={{onPrimaryContainer}}ff
+border={{outline}}ff

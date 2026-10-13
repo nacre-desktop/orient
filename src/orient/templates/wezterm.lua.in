@@ -1,0 +1,10 @@
+-- Docs: https://wezterm.org/config/appearance.html
+-- Assign this returned table to config.colors in your wezterm.lua.
+return {
+  foreground = "#{{onSurface}}", background = "#{{surface}}",
+  cursor_bg = "#{{primary}}", cursor_border = "#{{primary}}", cursor_fg = "#{{onPrimary}}",
+  selection_bg = "#{{primaryContainer}}", selection_fg = "#{{onPrimaryContainer}}",
+  split = "#{{outline}}",
+  ansi = { "#{{term0}}", "#{{term1}}", "#{{term2}}", "#{{term3}}", "#{{term4}}", "#{{term5}}", "#{{term6}}", "#{{term7}}" },
+  brights = { "#{{term8}}", "#{{term9}}", "#{{term10}}", "#{{term11}}", "#{{term12}}", "#{{term13}}", "#{{term14}}", "#{{term15}}" },
+}

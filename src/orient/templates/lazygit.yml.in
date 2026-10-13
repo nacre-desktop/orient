@@ -1,0 +1,13 @@
+# Docs: https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#color-attributes
+# Merge gui.theme into config.yml; use alongside the matching terminal palette.
+gui:
+  theme:
+    activeBorderColor: ["#{{primary}}", bold]
+    inactiveBorderColor: ["#{{outline}}"]
+    searchingActiveBorderColor: ["#{{secondary}}", bold]
+    optionsTextColor: ["#{{primary}}"]
+    selectedLineBgColor: ["#{{primaryContainer}}"]
+    cherryPickedCommitBgColor: ["#{{secondaryContainer}}"]
+    cherryPickedCommitFgColor: ["#{{onSecondaryContainer}}"]
+    unstagedChangesColor: ["#{{error}}"]
+    defaultFgColor: ["#{{onSurface}}"]

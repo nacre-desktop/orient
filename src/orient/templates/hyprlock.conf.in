@@ -1,0 +1,10 @@
+# Docs: https://wiki.hypr.land/Hypr-Ecosystem/hyprlock/
+# Merge these color keys into your existing input-field; do not duplicate widgets.
+input-field {
+    inner_color = rgb({{surface}})
+    outer_color = rgb({{primary}})
+    font_color = rgb({{onSurface}})
+    check_color = rgb({{secondary}})
+    fail_color = rgb({{error}})
+    capslock_color = rgb({{tertiary}})
+}

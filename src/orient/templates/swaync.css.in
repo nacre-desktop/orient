@@ -1,0 +1,24 @@
+/* Docs: https://github.com/ErikReider/SwayNotificationCenter/blob/main/data/style/style.scss
+   Import after your layout CSS; explicit label colors override the default theme. */
+.control-center, .notification {
+    background-color: #{{surface}};
+    color: #{{onSurface}};
+    border-color: #{{outlineVariant}};
+}
+.notification .notification-default-action,
+.notification .notification-content .summary,
+.notification .notification-content .body,
+.notification .notification-content .time { color: #{{onSurface}}; }
+.notification.critical {
+    background-color: #{{errorContainer}};
+    color: #{{onErrorContainer}};
+    border-color: #{{error}};
+}
+.notification.critical .notification-default-action,
+.notification.critical .notification-content .summary,
+.notification.critical .notification-content .body,
+.notification.critical .notification-content .time { color: #{{onErrorContainer}}; }
+.notification-action button, .close-button {
+    background-color: #{{primaryContainer}};
+    color: #{{onPrimaryContainer}};
+}

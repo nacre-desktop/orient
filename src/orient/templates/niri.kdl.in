@@ -1,0 +1,14 @@
+// Docs: https://niri-wm.github.io/niri/Configuration%3A-Layout.html
+// Include at the top level after your layout. Only these color properties change.
+layout {
+    focus-ring {
+        active-color "#{{primary}}"
+        inactive-color "#{{outlineVariant}}"
+        urgent-color "#{{error}}"
+    }
+    border {
+        active-color "#{{primary}}"
+        inactive-color "#{{outlineVariant}}"
+        urgent-color "#{{error}}"
+    }
+}

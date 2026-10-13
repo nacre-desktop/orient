@@ -1,0 +1,23 @@
+# Docs: https://fishshell.com/docs/current/interactive.html#syntax-highlighting
+# Source from config.fish. Global variables avoid writing persistent universal state.
+set -g fish_color_normal {{onSurface}}
+set -g fish_color_command {{primary}}
+set -g fish_color_keyword {{secondary}}
+set -g fish_color_quote {{green}}
+set -g fish_color_redirection {{tertiary}}
+set -g fish_color_end {{secondary}}
+set -g fish_color_error {{error}}
+set -g fish_color_param {{onSurface}}
+set -g fish_color_comment {{onSurfaceVariant}}
+set -g fish_color_operator {{primary}}
+set -g fish_color_escape {{tertiary}}
+set -g fish_color_autosuggestion {{onSurfaceVariant}}
+set -g fish_color_search_match --background={{primaryContainer}}
+set -g fish_color_selection {{onPrimaryContainer}} --background={{primaryContainer}}
+set -g fish_pager_color_prefix {{primary}}
+set -g fish_pager_color_completion {{onSurface}}
+set -g fish_pager_color_description {{onSurfaceVariant}}
+set -g fish_pager_color_selected_background --background={{primaryContainer}}
+set -g fish_pager_color_selected_prefix {{onPrimaryContainer}}
+set -g fish_pager_color_selected_completion {{onPrimaryContainer}}
+set -g fish_pager_color_selected_description {{onPrimaryContainer}}

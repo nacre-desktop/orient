@@ -1,0 +1,83 @@
+{
+  "_comment": "Docs: https://zed.dev/docs/themes (JSON has no comment syntax)",
+  "$schema": "https://zed.dev/schema/themes/v0.2.0.json",
+  "name": "Orient",
+  "author": "Nacre contributors",
+  "themes": [
+    {
+      "name": "Orient {{mode}}",
+      "appearance": "{{mode}}",
+      "style": {
+        "background": "#{{surface}}",
+        "surface.background": "#{{surfaceContainer}}",
+        "elevated_surface.background": "#{{surfaceContainerHigh}}",
+        "text": "#{{onSurface}}",
+        "text.muted": "#{{onSurfaceVariant}}",
+        "text.accent": "#{{primary}}",
+        "border": "#{{outlineVariant}}",
+        "border.focused": "#{{primary}}",
+        "editor.background": "#{{surface}}",
+        "editor.foreground": "#{{onSurface}}",
+        "editor.gutter.background": "#{{surface}}",
+        "editor.line_number": "#{{onSurfaceVariant}}",
+        "editor.active_line_number": "#{{primary}}",
+        "editor.active_line.background": "#{{surfaceContainer}}",
+        "status_bar.background": "#{{surfaceContainer}}",
+        "title_bar.background": "#{{surfaceContainer}}",
+        "toolbar.background": "#{{surfaceContainer}}",
+        "tab_bar.background": "#{{surface}}",
+        "tab.active_background": "#{{surfaceContainer}}",
+        "tab.inactive_background": "#{{surface}}",
+        "terminal.background": "#{{surface}}",
+        "terminal.foreground": "#{{onSurface}}",
+        "error": "#{{error}}",
+        "warning": "#{{yellow}}",
+        "success": "#{{green}}",
+        "error.background": "#{{errorContainer}}",
+        "terminal.ansi.black": "#{{term0}}",
+        "terminal.ansi.bright_black": "#{{term8}}",
+        "terminal.ansi.red": "#{{term1}}",
+        "terminal.ansi.bright_red": "#{{term9}}",
+        "terminal.ansi.green": "#{{term2}}",
+        "terminal.ansi.bright_green": "#{{term10}}",
+        "terminal.ansi.yellow": "#{{term3}}",
+        "terminal.ansi.bright_yellow": "#{{term11}}",
+        "terminal.ansi.blue": "#{{term4}}",
+        "terminal.ansi.bright_blue": "#{{term12}}",
+        "terminal.ansi.magenta": "#{{term5}}",
+        "terminal.ansi.bright_magenta": "#{{term13}}",
+        "terminal.ansi.cyan": "#{{term6}}",
+        "terminal.ansi.bright_cyan": "#{{term14}}",
+        "terminal.ansi.white": "#{{term7}}",
+        "terminal.ansi.bright_white": "#{{term15}}",
+        "players": [
+          {
+            "cursor": "#{{primary}}",
+            "background": "#{{primaryContainer}}",
+            "selection": "#{{primaryContainer}}"
+          }
+        ],
+        "syntax": {
+          "comment": {
+            "color": "#{{onSurfaceVariant}}"
+          },
+          "keyword": {
+            "color": "#{{primary}}"
+          },
+          "string": {
+            "color": "#{{green}}"
+          },
+          "number": {
+            "color": "#{{tertiary}}"
+          },
+          "function": {
+            "color": "#{{secondary}}"
+          },
+          "type": {
+            "color": "#{{yellow}}"
+          }
+        }
+      }
+    }
+  ]
+}

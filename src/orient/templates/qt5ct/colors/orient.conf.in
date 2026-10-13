@@ -1,0 +1,7 @@
+# Docs: https://github.com/desktop-app/qt5ct/blob/master/colors/darker.conf
+# QPalette role order: WindowText through PlaceholderText (21 entries).
+# QColor hex uses AARRGGBB, not RRGGBBAA. Select in the Colors tab.
+[ColorScheme]
+active_colors=#ff{{onSurface}}, #ff{{surfaceContainer}}, #ff{{surfaceContainerHighest}}, #ff{{surfaceContainerHigh}}, #ff{{outline}}, #ff{{outlineVariant}}, #ff{{onSurface}}, #ff{{onSurface}}, #ff{{onSurface}}, #ff{{surface}}, #ff{{surface}}, #ff{{shadow}}, #ff{{primary}}, #ff{{onPrimary}}, #ff{{primary}}, #ff{{tertiary}}, #ff{{surfaceContainer}}, #ff{{surface}}, #ff{{surfaceContainer}}, #ff{{onSurface}}, #ff{{onSurfaceVariant}}
+disabled_colors=#ff{{onSurfaceVariant}}, #ff{{surfaceContainer}}, #ff{{surfaceContainerHighest}}, #ff{{surfaceContainerHigh}}, #ff{{outline}}, #ff{{outlineVariant}}, #ff{{onSurfaceVariant}}, #ff{{onSurface}}, #ff{{onSurfaceVariant}}, #ff{{surface}}, #ff{{surface}}, #ff{{shadow}}, #ff{{primary}}, #ff{{onPrimary}}, #ff{{primary}}, #ff{{tertiary}}, #ff{{surfaceContainer}}, #ff{{surface}}, #ff{{surfaceContainer}}, #ff{{onSurface}}, #ff{{onSurfaceVariant}}
+inactive_colors=#ff{{onSurface}}, #ff{{surfaceContainer}}, #ff{{surfaceContainerHighest}}, #ff{{surfaceContainerHigh}}, #ff{{outline}}, #ff{{outlineVariant}}, #ff{{onSurface}}, #ff{{onSurface}}, #ff{{onSurface}}, #ff{{surface}}, #ff{{surface}}, #ff{{shadow}}, #ff{{primary}}, #ff{{onPrimary}}, #ff{{primary}}, #ff{{tertiary}}, #ff{{surfaceContainer}}, #ff{{surface}}, #ff{{surfaceContainer}}, #ff{{onSurface}}, #ff{{onSurfaceVariant}}

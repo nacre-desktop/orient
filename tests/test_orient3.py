@@ -321,7 +321,10 @@ class Orient3Tests(unittest.TestCase):
         data = from_image(self.scene("203450", "aa679b"))
         with patch.object(exporter, "__file__", str(alias / "export.py")):
             paths = exporter.export(data, self.home / "export-symlink")
-        self.assertEqual(len(paths), 13)
+        self.assertEqual(
+            {Path(path).relative_to(self.home / "export-symlink") for path in paths},
+            {path.relative_to(alias / "templates").with_suffix("") for path in (alias / "templates").rglob("*.in")},
+        )
 
     def test_vision_simulation_neutrals_and_safe_adjustments(self):
         for vision in ("protanopia", "deuteranopia", "tritanopia"):

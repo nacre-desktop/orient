@@ -1,0 +1,14 @@
+# Docs: https://dunst-project.org/documentation/
+# Merge urgency sections into dunstrc; sizing/timeouts remain your choice.
+[urgency_low]
+background = "#{{surface}}"
+foreground = "#{{onSurface}}"
+frame_color = "#{{outlineVariant}}"
+[urgency_normal]
+background = "#{{surface}}"
+foreground = "#{{onSurface}}"
+frame_color = "#{{primary}}"
+[urgency_critical]
+background = "#{{errorContainer}}"
+foreground = "#{{onErrorContainer}}"
+frame_color = "#{{error}}"

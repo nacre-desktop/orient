@@ -1,0 +1,10 @@
+# Docs: https://github.com/karlstav/cava/blob/master/example_files/config
+# Merge into the [color] section. Hex colors require a color-capable output backend.
+[color]
+background = '#{{surface}}'
+foreground = '#{{primary}}'
+gradient = 1
+gradient_count = 3
+gradient_color_1 = '#{{primary}}'
+gradient_color_2 = '#{{secondary}}'
+gradient_color_3 = '#{{tertiary}}'

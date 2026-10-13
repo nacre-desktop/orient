@@ -1,0 +1,27 @@
+# Docs: https://yazi-rs.github.io/docs/configuration/theme/
+# Merge into theme.toml. Uses the current [mgr] section, not legacy [manager].
+[mgr]
+cwd = { fg = "#{{primary}}" }
+find_keyword = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}", bold = true }
+find_position = { fg = "#{{secondary}}", bold = true }
+marker_copied = { fg = "#{{green}}", bg = "#{{green}}" }
+marker_cut = { fg = "#{{error}}", bg = "#{{error}}" }
+marker_marked = { fg = "#{{tertiary}}", bg = "#{{tertiary}}" }
+border_style = { fg = "#{{outline}}" }
+[mode]
+normal_main = { fg = "#{{onPrimary}}", bg = "#{{primary}}", bold = true }
+normal_alt = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}" }
+select_main = { fg = "#{{onSecondary}}", bg = "#{{secondary}}", bold = true }
+select_alt = { fg = "#{{onSecondaryContainer}}", bg = "#{{secondaryContainer}}" }
+unset_main = { fg = "#{{onTertiary}}", bg = "#{{tertiary}}", bold = true }
+unset_alt = { fg = "#{{onTertiaryContainer}}", bg = "#{{tertiaryContainer}}" }
+[status]
+overall = { fg = "#{{onSurface}}", bg = "#{{surface}}" }
+progress_label = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}" }
+progress_normal = { fg = "#{{primary}}", bg = "#{{surface}}" }
+progress_error = { fg = "#{{error}}", bg = "#{{surface}}" }
+[which]
+mask = { bg = "#{{surface}}" }
+cand = { fg = "#{{primary}}" }
+rest = { fg = "#{{onSurface}}" }
+desc = { fg = "#{{onSurfaceVariant}}" }

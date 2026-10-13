@@ -1,0 +1,23 @@
+# Docs: https://docs.helix-editor.com/themes.html
+# Save as themes/orient.toml and select theme = "orient" in config.toml.
+"ui.background" = { bg = "#{{surface}}" }
+"ui.text" = "#{{onSurface}}"
+"ui.text.focus" = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}" }
+"ui.selection" = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}" }
+"ui.cursor" = { fg = "#{{onPrimary}}", bg = "#{{primary}}" }
+"ui.cursor.match" = { fg = "#{{onSecondaryContainer}}", bg = "#{{secondaryContainer}}" }
+"ui.linenr" = "#{{onSurfaceVariant}}"
+"ui.linenr.selected" = "#{{primary}}"
+"ui.statusline" = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}" }
+"ui.statusline.inactive" = { fg = "#{{onSurface}}", bg = "#{{surfaceContainer}}" }
+"ui.popup" = { fg = "#{{onSurface}}", bg = "#{{surfaceContainer}}" }
+"ui.menu" = { fg = "#{{onSurface}}", bg = "#{{surfaceContainer}}" }
+"ui.menu.selected" = { fg = "#{{onPrimaryContainer}}", bg = "#{{primaryContainer}}" }
+"comment" = "#{{onSurfaceVariant}}"
+"keyword" = "#{{primary}}"
+"string" = "#{{green}}"
+"constant.numeric" = "#{{tertiary}}"
+"function" = "#{{secondary}}"
+"type" = "#{{yellow}}"
+"diagnostic.error" = { underline = { color = "#{{error}}", style = "curl" } }
+"diagnostic.warning" = { underline = { color = "#{{yellow}}", style = "curl" } }

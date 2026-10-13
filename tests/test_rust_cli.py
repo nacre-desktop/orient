@@ -156,5 +156,11 @@ class RustCliTests(unittest.TestCase):
         directory = self.root / "themes"
         result = self.run_cli("export", palette_path, directory)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(len(json.loads(result.stdout)["files"]), 13)
+        self.assertEqual(
+            {Path(path).relative_to(directory) for path in json.loads(result.stdout)["files"]},
+            {
+                path.relative_to(Path(__file__).parents[1] / "src/orient/templates").with_suffix("")
+                for path in (Path(__file__).parents[1] / "src/orient/templates").rglob("*.in")
+            },
+        )
         self.assertEqual(self.run_cli("export", palette_path, directory).returncode, 1)

@@ -345,7 +345,13 @@ class MatugenTemplateTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 export(palette, root / "export", template)
             export(palette, root / "builtins")
-            self.assertEqual(len(list((root / "builtins").rglob("*.*"))), 13)
+            self.assertEqual(
+                {path.relative_to(root / "builtins") for path in (root / "builtins").rglob("*") if path.is_file()},
+                {
+                    path.relative_to(Path(__file__).parents[1] / "src/orient/templates").with_suffix("")
+                    for path in (Path(__file__).parents[1] / "src/orient/templates").rglob("*.in")
+                },
+            )
 
     def test_opposite_mode_can_be_generated_from_unchanged_source(self):
         with tempfile.TemporaryDirectory() as directory:
