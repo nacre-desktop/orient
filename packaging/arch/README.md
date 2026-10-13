@@ -22,8 +22,8 @@ disposable privileged container. The development recipe uses a fixed tested Git 
 dev5 archive predates the Rust engine. Development CI separately verifies its
 current sdist artifact digest and substitutes that snapshot into a temporary
 recipe. A future maintainer release must prepare a release-archive source pin;
-this migration does not upload packages, change versions or create tags.
+dev6 is a source-only version bump; no packages are uploaded or tags created.
 
-PyPI uses `0.1.0.dev5`; Arch uses `0.1.0dev5` so it sorts before final `0.1.0`.
+PyPI uses `0.1.0.dev6`; Arch uses `0.1.0dev6` so it sorts before final `0.1.0`.
 The recipe has not been submitted to the AUR or an official repository. Regenerate
 `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO` after recipe changes.
