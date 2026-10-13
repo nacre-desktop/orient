@@ -12,7 +12,7 @@ depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
 makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git' 'cmake')
 checkdepends=('ffmpeg')
 optdepends=('ffmpeg: video frame sampling')
-_revision=b7ac52c83bdb2922be0c329b70a7ce5fb531d730
+_revision=415da6355b119cc2146330e5f33eda291e7d3dca
 _srcdir=orient
 source=("orient::git+${url}.git#commit=${_revision}")
 sha256sums=('SKIP')
