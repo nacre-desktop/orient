@@ -11,9 +11,17 @@ fn persistent_requests_match_one_shot_and_exit_on_eof() {
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
+    let cache = tempfile::tempdir().unwrap();
+    let image = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../tests/orient-gallery/images/warm-room.png");
     let mut input = server.stdin.take().unwrap();
     let mut output = BufReader::new(server.stdout.take().unwrap());
     for (id, operation, payload) in [
+        (
+            json!(16),
+            "from_image",
+            json!({"path":image,"options":{"cache_dir":cache.path(),"mode":"dark","personality":"mist"}}),
+        ),
         (json!(17), "lch", json!({"value":"aabbcc"})),
         (json!("two"), "clean", json!({"value":"bad"})),
         (
