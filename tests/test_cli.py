@@ -23,7 +23,7 @@ class PortableCliTests(unittest.TestCase):
                 "XDG_CONFIG_HOME": str(home / "config"),
                 "XDG_STATE_HOME": str(home / "state"),
                 "XDG_CACHE_HOME": str(home / "cache"),
-                "PYTHONPATH": str(Path(__file__).parents[1] / "src"),
+                "PYTHONPATH": "",
             }
             for key in ("WAYLAND_DISPLAY", "DISPLAY", "HYPRLAND_INSTANCE_SIGNATURE"):
                 env.pop(key, None)

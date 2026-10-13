@@ -1,0 +1,19 @@
+[package]
+name = "orient-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+regex = "1"
+serde_json.workspace = true
+indexmap.workspace = true
+
+[dev-dependencies]
+flate2 = "1"
+png = "0.18"
+
+[build-dependencies]
+sha2 = "0.10"

@@ -7,13 +7,11 @@ import importlib.util
 import json
 from pathlib import Path
 import random
-import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "src"))
 from PIL import Image
 from orient import ENGINE_ID, __version__
 from orient import classic, engine, export, extract, palette, template_engine
@@ -163,6 +161,8 @@ def expression_cases():
 
 
 def make(destination):
+    if importlib.util.find_spec("orient._core") is not None:
+        raise RuntimeError("Generate reference fixtures only with the original Python implementation")
     destination.mkdir(parents=True, exist_ok=True)
     cases = {"schema": 1, "seed": SEED, "reference": {"version": __version__, "engine": ENGINE_ID}, "images": []}
     matrix = options()

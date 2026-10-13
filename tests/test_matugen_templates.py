@@ -8,8 +8,6 @@ import tempfile
 import subprocess
 import unittest
 
-SRC = Path(__file__).parents[1] / "src"
-sys.path.insert(0, str(SRC))
 from orient.template_engine import render_values
 from orient.engine import default_palette, from_image
 from orient.export import render, export
@@ -320,7 +318,7 @@ class MatugenTemplateTests(unittest.TestCase):
                 [sys.executable, "-m", "orient", "render", str(palette), str(template)],
                 env={
                     **os.environ,
-                    "PYTHONPATH": str(SRC),
+                    "PYTHONPATH": "",
                     "HOME": str(root),
                     "XDG_CACHE_HOME": str(root / "cache"),
                 },
@@ -381,7 +379,7 @@ class MatugenTemplateTests(unittest.TestCase):
                 **os.environ,
                 "HOME": str(root),
                 "XDG_CACHE_HOME": str(root / "cache"),
-                "PYTHONPATH": str(SRC),
+                "PYTHONPATH": "",
             }
             result = subprocess.run(
                 [

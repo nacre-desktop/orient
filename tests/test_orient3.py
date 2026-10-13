@@ -4,7 +4,6 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import sys
 import shutil
 import subprocess
 import tempfile
@@ -12,7 +11,6 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT / "src"))
 from PIL import Image
 from orient.engine import from_image
 from orient.colour import color, lch, hue_distance

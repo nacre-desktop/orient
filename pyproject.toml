@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling>=1.26,<2"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
 
 [project]
 name = "orient-colors"
@@ -26,12 +26,20 @@ Issues = "https://github.com/nacre-desktop/orient/issues"
 [project.scripts]
 orient = "orient.cli:main"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/orient"]
-
-[tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/scripts", "/docs", "/README.md", "/CHANGELOG.md", "/VERSION", "/LICENSE", "/pyproject.toml"]
-exclude = ["/docs/development/progress"]
+[tool.maturin]
+manifest-path = "crates/orient-py/Cargo.toml"
+python-source = "src"
+module-name = "orient._core"
+features = ["pyo3/extension-module"]
+include = [
+  { path = "tests/**/*", format = "sdist" },
+  { path = "scripts/*", format = "sdist" },
+  { path = "docs/**/*", format = "sdist" },
+  { path = "VERSION", format = "sdist" },
+  { path = "CHANGELOG.md", format = "sdist" },
+  { path = "Cargo.lock", format = "sdist" },
+]
+exclude = ["docs/development/progress/**"]
 
 [tool.ruff]
 target-version = "py313"
