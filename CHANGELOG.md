@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Move deterministic engine calculations into Rust with abi3 Python bindings.
+  Preserve Pillow decoding, Python API, palette colors and template output.
+  Source builds now require Rust and maturin.
+
 ## 0.1.0-dev.5
 
 Add tokenless TestPyPI-first publishing with a protected production approval gate,

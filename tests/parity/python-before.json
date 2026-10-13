@@ -1,44 +1,44 @@
 [
   {
     "image": "coast-day.png",
-    "median_seconds": 0.08927752800809685,
-    "peak_rss_kib": 28844,
+    "median_seconds": 0.08925458999988223,
+    "peak_rss_kib": 29864,
     "runs": 3
   },
   {
     "image": "mist-forest.png",
-    "median_seconds": 0.07277129100111779,
-    "peak_rss_kib": 28588,
+    "median_seconds": 0.0678212220000205,
+    "peak_rss_kib": 28828,
     "runs": 3
   },
   {
     "image": "monochrome.png",
-    "median_seconds": 0.06602328798908275,
-    "peak_rss_kib": 28408,
+    "median_seconds": 0.06213430699995115,
+    "peak_rss_kib": 28804,
     "runs": 3
   },
   {
     "image": "moving-lantern.gif",
-    "median_seconds": 0.15874863500357606,
-    "peak_rss_kib": 29384,
+    "median_seconds": 0.153255136000098,
+    "peak_rss_kib": 29460,
     "runs": 3
   },
   {
     "image": "neon-scene.png",
-    "median_seconds": 0.08182041899999604,
-    "peak_rss_kib": 28624,
+    "median_seconds": 0.0840283919999365,
+    "peak_rss_kib": 28840,
     "runs": 3
   },
   {
     "image": "night-city.png",
-    "median_seconds": 0.07792493699525949,
-    "peak_rss_kib": 28628,
+    "median_seconds": 0.07313916700013579,
+    "peak_rss_kib": 28832,
     "runs": 3
   },
   {
     "image": "warm-room.png",
-    "median_seconds": 0.08346331700158771,
-    "peak_rss_kib": 28688,
+    "median_seconds": 0.07414474699999118,
+    "peak_rss_kib": 28888,
     "runs": 3
   }
 ]

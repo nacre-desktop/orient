@@ -94,3 +94,6 @@ is an independent implementation. See the [implementation-origin record](docs/pr
 
 For development checks and PR expectations, see [Contributing](CONTRIBUTING.md).
 Report vulnerabilities through the private channel in [Security](SECURITY.md).
+
+Building from source requires a Rust toolchain (Rust 1.85 or newer). Prebuilt
+abi3 wheels support Python 3.13 and newer; Pillow still decodes images.
