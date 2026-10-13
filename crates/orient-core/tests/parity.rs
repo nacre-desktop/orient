@@ -275,3 +275,45 @@ fn template_parity() {
         );
     }
 }
+#[test]
+fn supplemental_api_parity() {
+    let data: Value = serde_json::from_reader(
+        File::open(root().parent().unwrap().join("golden-api.json")).unwrap(),
+    )
+    .unwrap();
+    for case in data["generated"].as_array().unwrap() {
+        same(
+            outcome(
+                orient_core::palette::generate(case["seed"].as_str().unwrap(), &case["options"])
+                    .map(Value::Object),
+            ),
+            &case["expected"],
+            &format!("API {}", case["options"]),
+        );
+    }
+}
+
+#[test]
+fn custom_scalar_parity() {
+    let data: Value = serde_json::from_reader(
+        File::open(root().parent().unwrap().join("golden-api.json")).unwrap(),
+    )
+    .unwrap();
+    for case in data["templates"].as_array().unwrap() {
+        same(
+            outcome(
+                orient_core::template_engine::render_values(
+                    case["template"].as_str().unwrap(),
+                    case["values"].as_object().unwrap(),
+                    None,
+                    None,
+                    case["custom"].as_object(),
+                    None,
+                )
+                .map(Value::String),
+            ),
+            &case["expected"],
+            "custom scalar",
+        );
+    }
+}

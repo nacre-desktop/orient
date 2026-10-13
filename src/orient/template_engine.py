@@ -8,6 +8,7 @@ if not __package__:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orient._bridge import call
+import math
 
 
 def requested_modes(template):
@@ -19,6 +20,12 @@ def requested_contexts(template):
 
 
 def render_values(template, values, schemes=None, image=None, custom=None, data=None):
+    if custom:
+        # JSON has no non-finite numbers; these keywords were serialized as text.
+        custom = {
+            key: str(value) if isinstance(value, float) and not math.isfinite(value) else value
+            for key, value in custom.items()
+        }
     return call(
         "render_values", template=template, values=values, schemes=schemes, image=image, custom=custom, data=data
     )

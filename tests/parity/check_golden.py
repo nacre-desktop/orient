@@ -50,9 +50,24 @@ class GoldenParity(unittest.TestCase):
                         )
                         # The normalized-only synthetic source has different encoded bytes.
                         # Restore the recorded source identity; core calculations do not use it.
-                        if "value" in actual:
+                        if "value" in actual and not source.is_relative_to(gallery):
                             actual["value"]["source"]["digest"] = record["expected"]["value"]["source"]["digest"]
                         self.assertEqual(actual, record["expected"], (case["name"], record["options"]))
+            api = json.loads((GOLDEN.parent / "golden-api.json").read_text())
+            for record in api["generated"]:
+                self.assertEqual(
+                    outcome(lambda record=record: palette.generate(record["seed"], **record["options"])),
+                    record["expected"],
+                )
+            for record in api["templates"]:
+                self.assertEqual(
+                    outcome(
+                        lambda record=record: template_engine.render_values(
+                            record["template"], record["values"], custom=record["custom"]
+                        )
+                    ),
+                    record["expected"],
+                )
             for record in data["defaults"]:
                 self.assertEqual(
                     outcome(lambda record=record: engine.default_palette(**record["options"])), record["expected"]

@@ -4,14 +4,7 @@ use crate::{accessibility, palette};
 use crate::{num, str_at, text, Colors, Error, Result};
 use serde_json::{json, Value};
 pub fn settings(options: &Value) -> Result<Value> {
-    let p = options["personality"]
-        .as_str()
-        .filter(|p| !p.is_empty())
-        .unwrap_or(if options["harmony"] == true {
-            "harmony"
-        } else {
-            "natural"
-        });
+    let p = crate::personality(options, options["harmony"] == true)?;
     let (p, background) = palette::background_policy(p, &options["background_from_wallpaper"])?;
     let mut overrides = Colors::new();
     if let Some(map) = options["overrides"].as_object() {
@@ -24,12 +17,17 @@ pub fn settings(options: &Value) -> Result<Value> {
             );
         }
     }
-    let accent = match options["accent"].as_str().filter(|v| !v.is_empty()) {
-        Some(value) => json!(clean(value)?),
-        None => Value::Null,
+    let accent = if crate::truthy(&options["accent"]) {
+        json!(clean(
+            options["accent"]
+                .as_str()
+                .ok_or("Expected a six-digit RGB color")?
+        )?)
+    } else {
+        Value::Null
     };
     Ok(
-        json!({"mode":options["mode"].as_str().unwrap_or("dark"),"variant":options["variant"].as_str().unwrap_or("tonalspot"),"flavour":options["flavour"].as_str().unwrap_or("default"),"accent":accent,"smart":options["smart"].as_bool().unwrap_or(false),"harmony":p=="harmony","personality":p,"background_from_wallpaper":background,"overrides":overrides,"brightness":options.get("brightness").cloned().unwrap_or(json!(0.0)),"saturation":options.get("saturation").cloned().unwrap_or(json!(1.0)),"hour":if p=="tide"||options["time_tint"]==true{options.get("hour").cloned().unwrap_or(json!(12))}else{json!(12)},"time_tint":options["time_tint"].as_bool().unwrap_or(false)}),
+        json!({"mode":options.get("mode").cloned().unwrap_or(json!("dark")),"variant":options.get("variant").cloned().unwrap_or(json!("tonalspot")),"flavour":options.get("flavour").cloned().unwrap_or(json!("default")),"accent":accent,"smart":options["smart"].as_bool().unwrap_or(false),"harmony":p=="harmony","personality":p,"background_from_wallpaper":background,"overrides":overrides,"brightness":options.get("brightness").cloned().unwrap_or(json!(0.0)),"saturation":options.get("saturation").cloned().unwrap_or(json!(1.0)),"hour":if p=="tide"||options["time_tint"]==true{options.get("hour").cloned().unwrap_or(json!(12))}else{json!(12)},"time_tint":options["time_tint"].as_bool().unwrap_or(false)}),
     )
 }
 pub fn pop_seed(
@@ -288,6 +286,6 @@ pub fn from_analysis(
 pub fn default_palette(options: &Value) -> Result<Value> {
     let colors = palette::generate(palette::DEFAULT_SEED, options)?;
     Ok(
-        json!({"formatVersion":crate::FORMAT_VERSION,"name":"default","mode":options["mode"].as_str().unwrap_or("dark"),"variant":options["variant"].as_str().unwrap_or("tonalspot"),"flavour":options["flavour"].as_str().unwrap_or("default"),"colours":colors,"engine":crate::ENGINE_ID,"input":{"personality":"natural"},"accessibility":accessibility::audit(&colors)?}),
+        json!({"formatVersion":crate::FORMAT_VERSION,"name":"default","mode":options.get("mode").cloned().unwrap_or(json!("dark")),"variant":options.get("variant").cloned().unwrap_or(json!("tonalspot")),"flavour":options.get("flavour").cloned().unwrap_or(json!("default")),"colours":colors,"engine":crate::ENGINE_ID,"input":{"personality":"natural"},"accessibility":accessibility::audit(&colors)?}),
     )
 }

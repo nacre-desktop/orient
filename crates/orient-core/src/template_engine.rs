@@ -448,6 +448,19 @@ pub fn format_color(value: &Value, fmt: &str) -> Result<String> {
         _ => return Err(format!("Unsupported Matugen color format: {fmt}").into()),
     })
 }
+fn scalar_string(value: &Value) -> String {
+    if let Some(value) = value.as_str() {
+        return value.into();
+    }
+    if value.is_f64() {
+        let value = format!("{:?}", value.as_f64().unwrap());
+        if let Some((mantissa, exponent)) = value.split_once('e') {
+            return format!("{mantissa}e{:+03}", exponent.parse::<i32>().unwrap());
+        }
+        return value;
+    }
+    value.to_string()
+}
 fn snake(role: &str) -> String {
     let chars: Vec<_> = role.chars().collect();
     let mut out = String::new();
@@ -717,19 +730,13 @@ impl Renderer<'_> {
                 return Err(format!("Missing or unsupported custom keyword: {name}").into());
             }
             let value = value.unwrap();
-            return Ok(value
-                .as_str()
-                .map(str::to_owned)
-                .unwrap_or_else(|| value.to_string()));
+            return Ok(scalar_string(value));
         }
         let mut parts: Vec<_> = expression.split('.').map(str::trim).collect();
         if scope.contains_key(parts[0]) || ["palettes", "base16"].contains(&parts[0]) {
             let value = self.lookup(expression, scope)?;
             return if value.is_string() || value.is_boolean() || value.is_i64() || value.is_u64() {
-                Ok(value
-                    .as_str()
-                    .map(str::to_owned)
-                    .unwrap_or_else(|| value.to_string()))
+                Ok(scalar_string(&value))
             } else {
                 Err(format!("Template expression must produce a scalar: {expression}").into())
             };

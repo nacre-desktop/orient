@@ -16,9 +16,7 @@ fn string<'a>(value: &'a Value, key: &str) -> Result<&'a str> {
         .ok_or_else(|| Error::Value("Expected a six-digit RGB color".into()))
 }
 fn number(value: &Value, key: &str) -> Result<f64> {
-    value[key]
-        .as_f64()
-        .ok_or_else(|| Error::Value(format!("Expected numeric {key}")))
+    core::numeric(&value[key]).ok_or_else(|| Error::Value(format!("Expected numeric {key}")))
 }
 fn map<'a>(value: &'a Value, key: &str) -> Result<&'a Colors> {
     value[key]

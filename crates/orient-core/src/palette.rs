@@ -156,6 +156,14 @@ pub const REQUIRED_ROLES: [&str; 120] = [
     "text",
     "yellow",
 ];
+fn override_source<'a>(overrides: &'a Colors, role: &str, fallback: &'a str) -> Result<&'a str> {
+    match overrides.get(role) {
+        Some(v) => v
+            .as_str()
+            .ok_or_else(|| "Expected a six-digit RGB color".into()),
+        None => Ok(fallback),
+    }
+}
 fn put(colors: &mut Colors, key: impl Into<String>, value: impl Into<String>) {
     colors.insert(key.into(), Value::String(value.into()));
 }
@@ -479,15 +487,12 @@ fn semantic_roles(colors: &mut Colors, hue: f64, bgs: &[String]) -> Result<()> {
 }
 pub fn generate(seed: &str, options: &Value) -> Result<Colors> {
     let harmony = options["harmony"].as_bool().unwrap_or(false);
-    let p = options["personality"]
-        .as_str()
-        .filter(|v| !v.is_empty())
-        .unwrap_or(if harmony { "harmony" } else { "natural" });
+    let p = crate::personality(options, harmony)?;
     let (personality, wallpaper) = background_policy(p, &options["background_from_wallpaper"])?;
     let p = personality.as_str();
-    let brightness = options["brightness"].as_f64().unwrap_or(0.0);
-    let saturation = options["saturation"].as_f64().unwrap_or(1.0);
-    let hour = options["hour"].as_f64().unwrap_or(12.0);
+    let brightness = crate::numeric(&options["brightness"]).unwrap_or(0.0);
+    let saturation = crate::numeric(&options["saturation"]).unwrap_or(1.0);
+    let hour = crate::numeric(&options["hour"]).unwrap_or(12.0);
     if !(-0.15..=0.15).contains(&brightness)
         || !(0.0..=1.6).contains(&saturation)
         || !(0.0..=23.0).contains(&hour)
@@ -502,19 +507,9 @@ pub fn generate(seed: &str, options: &Value) -> Result<Colors> {
     {
         return Err("Unknown accent role".into());
     }
-    let seed = clean(
-        overrides
-            .get("primary")
-            .and_then(Value::as_str)
-            .unwrap_or(seed),
-    )?;
+    let seed = clean(override_source(overrides, "primary", seed)?)?;
     let seed = if p == "pearl" {
-        clean(
-            overrides
-                .get("primary")
-                .and_then(Value::as_str)
-                .unwrap_or("d99fb7"),
-        )?
+        clean(override_source(overrides, "primary", "d99fb7")?)?
     } else {
         seed
     };
@@ -523,17 +518,26 @@ pub fn generate(seed: &str, options: &Value) -> Result<Colors> {
     } else if p == "vivid" {
         "vibrant"
     } else {
-        options["variant"].as_str().unwrap_or("tonalspot")
+        options
+            .get("variant")
+            .map_or(Some("tonalspot"), Value::as_str)
+            .ok_or("Unsupported palette mode, variant or flavour")?
     };
-    let mode = options["mode"].as_str().unwrap_or("dark");
-    let flavour = options["flavour"].as_str().unwrap_or("default");
+    let mode = options
+        .get("mode")
+        .map_or(Some("dark"), Value::as_str)
+        .ok_or("Unsupported palette mode, variant or flavour")?;
+    let flavour = options
+        .get("flavour")
+        .map_or(Some("default"), Value::as_str)
+        .ok_or("Unsupported palette mode, variant or flavour")?;
     if !["light", "dark"].contains(&mode)
         || !VARIANTS.contains(&variant)
         || !["default", "hard"].contains(&flavour)
     {
         return Err("Unsupported palette mode, variant or flavour".into());
     }
-    let body = if wallpaper && options["body"].is_object() {
+    let body = if wallpaper && options["body"].as_object().is_some_and(|v| !v.is_empty()) {
         Some(&options["body"])
     } else {
         None
@@ -691,18 +695,8 @@ pub fn generate(seed: &str, options: &Value) -> Result<Colors> {
         chroma,
     };
     policy.family(&mut colors, &bgs, "primary", &seed, 1.0)?;
-    let secondary = clean(
-        overrides
-            .get("secondary")
-            .and_then(Value::as_str)
-            .unwrap_or(&secondary),
-    )?;
-    let tertiary = clean(
-        overrides
-            .get("tertiary")
-            .and_then(Value::as_str)
-            .unwrap_or(&tertiary),
-    )?;
+    let secondary = clean(override_source(overrides, "secondary", &secondary)?)?;
+    let tertiary = clean(override_source(overrides, "tertiary", &tertiary)?)?;
     policy.family(
         &mut colors,
         &bgs,

@@ -70,3 +70,29 @@ pub fn sum(values: impl IntoIterator<Item = f64>) -> f64 {
 }
 pub const FORMAT_VERSION: u32 = 1;
 pub const ENGINE_ID: &str = env!("ORIENT_ENGINE_ID");
+
+/// Python booleans are numeric, but remain booleans in returned input settings.
+pub fn numeric(value: &Value) -> Option<f64> {
+    value
+        .as_f64()
+        .or_else(|| value.as_bool().map(|v| if v { 1.0 } else { 0.0 }))
+}
+pub fn truthy(value: &Value) -> bool {
+    match value {
+        Value::Null => false,
+        Value::Bool(v) => *v,
+        Value::Number(v) => v.as_f64().is_some_and(|v| v != 0.0),
+        Value::String(v) => !v.is_empty(),
+        Value::Array(v) => !v.is_empty(),
+        Value::Object(v) => !v.is_empty(),
+    }
+}
+pub fn personality(options: &Value, harmony: bool) -> Result<&str> {
+    if truthy(&options["personality"]) {
+        options["personality"]
+            .as_str()
+            .ok_or_else(|| "Unknown palette personality".into())
+    } else {
+        Ok(if harmony { "harmony" } else { "natural" })
+    }
+}
