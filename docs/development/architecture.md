@@ -74,6 +74,13 @@ version and fingerprint. Native identity includes both core and decoder source
 hashes; Python identity includes the core hash only. SIGINT/SIGTERM cancellation
 also kills and reaps active ffmpeg/ffprobe process groups.
 
+Long-lived consumers can use `orient --rpc --serve`. Each stdin line carries
+`id` (an integer or string), `operation` and `payload`; each stdout line repeats
+that ID and the same response envelope. Replies flush immediately, operation
+errors leave the server available, and EOF exits. Requests are limited to 16 MiB.
+Idle servers block on stdin. Cancellation ends the server after decoder cleanup;
+consumers should discard a timed-out child and start a new one on the next call.
+
 Pillow plugin IDs outside the binary's six-format set (availability depends on
 Pillow's build and optional tools): AVIF, BLP, BUFR, CUR, DCX, DDS, DIB, EPS,
 FITS, FLI, FTEX, GBR, GRIB, HDF5, ICNS, ICO, IM, IMT, IPTC, JPEG2000, MCIDAS,

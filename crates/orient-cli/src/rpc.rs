@@ -1,8 +1,8 @@
-//! One-shot local JSON interface for consumers requiring the complete engine API.
+//! Local JSON interface, with an optional persistent JSON-lines transport.
 use crate::{build_info, decoder, engine_id, export, from_image, resolve, Result};
 use serde_json::{json, Map, Value};
 use std::{
-    io::{Read, Write},
+    io::{BufRead, Read, Write},
     path::Path,
 };
 fn string<'a>(v: &'a Value, key: &str) -> Result<&'a str> {
@@ -78,7 +78,18 @@ pub fn serve() {
     };
     let result = request();
     let failed = result.is_err();
-    let response = match result {
+    let response = response(result);
+    let output = serde_json::to_vec(&response).expect("finite engine reply");
+    if std::io::stdout().write_all(&output).is_err() {
+        std::process::exit(1)
+    }
+    if failed {
+        std::process::exit(1)
+    }
+}
+
+fn response(result: Result<Value>) -> Value {
+    match result {
         Ok(value) => json!({"interfaceVersion":1,"engine":engine_id(),"result":value}),
         Err(error) => {
             let kind = match error.downcast_ref::<orient_core::Error>() {
@@ -94,12 +105,52 @@ pub fn serve() {
             };
             json!({"interfaceVersion":1,"engine":engine_id(),"error":{"kind":kind,"message":error.to_string()}})
         }
-    };
-    let output = serde_json::to_vec(&response).expect("finite engine reply");
-    if std::io::stdout().write_all(&output).is_err() {
-        std::process::exit(1)
     }
-    if failed {
-        std::process::exit(1)
+}
+
+/// Process bounded JSON lines serially. EOF shuts down without polling or threads.
+pub fn serve_lines() -> Result<()> {
+    const LIMIT: u64 = 16 * 1024 * 1024;
+    let mut input = std::io::stdin().lock();
+    let mut output = std::io::stdout().lock();
+    loop {
+        let mut line = Vec::new();
+        if input
+            .by_ref()
+            .take(LIMIT + 1)
+            .read_until(b'\n', &mut line)?
+            == 0
+        {
+            return Ok(());
+        }
+        if line.len() as u64 > LIMIT {
+            let mut reply = response(Err(crate::error("Native request exceeds its 16 MiB limit")));
+            reply["id"] = Value::Null;
+            serde_json::to_writer(&mut output, &reply)?;
+            output.write_all(b"\n")?;
+            output.flush()?;
+            return Err(crate::error("Native request exceeds its 16 MiB limit"));
+        }
+        let request = serde_json::from_slice::<Value>(&line);
+        let id = request
+            .as_ref()
+            .ok()
+            .and_then(|v| v.get("id"))
+            .cloned()
+            .unwrap_or(Value::Null);
+        let result = request.map_err(Into::into).and_then(|data| {
+            if !(id.is_string() || id.is_u64() || id.is_i64()) {
+                return Err(crate::error("Expected request id string or integer"));
+            }
+            execute(string(&data, "operation")?, &data["payload"])
+        });
+        let mut reply = response(result);
+        reply["id"] = id;
+        serde_json::to_writer(&mut output, &reply)?;
+        output.write_all(b"\n")?;
+        output.flush()?;
+        if crate::CANCELLED.load(std::sync::atomic::Ordering::Relaxed) {
+            return Err(crate::error("Native request cancelled"));
+        }
     }
 }

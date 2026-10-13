@@ -2,6 +2,8 @@
 
 ## 0.1.0-dev.6 (unreleased)
 
+- Add persistent JSON-lines RPC with request IDs for desktop helper processes.
+
 - Expose bounded native decoding as `orient-decoder` for direct Rust consumers.
   Preserve Pillow thumbnail notices and freeze 55 additional normalized frames.
 

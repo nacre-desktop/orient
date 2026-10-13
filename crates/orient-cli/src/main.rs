@@ -328,6 +328,13 @@ fn main() {
         rpc::serve();
         return;
     }
+    if arguments.len() == 3 && arguments[1] == "--rpc" && arguments[2] == "--serve" {
+        if let Err(error) = rpc::serve_lines() {
+            eprintln!("orient: {error}");
+            std::process::exit(1);
+        }
+        return;
+    }
     for arg in std::env::args().skip(1) {
         if [
             "analyze", "sample", "palette", "export", "render", "--help", "-h",
