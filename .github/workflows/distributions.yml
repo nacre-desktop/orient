@@ -19,7 +19,7 @@ jobs:
         id: build-distributions
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg liblcms2-dev pkg-config
+          sudo apt-get install -y ffmpeg liblcms2-dev pkg-config cmake
           cargo build --release --locked -p orient-cli --bins --example normalized_frames
           python -m pip install . build twine ruff==0.16.10
           ruff format --check .

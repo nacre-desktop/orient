@@ -16,7 +16,7 @@ use std::{
     time::{Duration, Instant},
 };
 pub const MAX_PIXELS: u64 = 50_000_000;
-fn check(width: u32, height: u32) -> Result<()> {
+pub(crate) fn check(width: u32, height: u32) -> Result<()> {
     if u64::from(width) * u64::from(height) > MAX_PIXELS {
         fail("Image exceeds the 50 megapixel safety limit")
     } else {
@@ -108,7 +108,14 @@ pub fn still(path: &Path) -> Result<Frame> {
     }
     let profile = decoder.icc_profile()?;
     let orientation = decoder.orientation()?;
-    let mut image = DynamicImage::from_decoder(decoder)?;
+    let mut image = if format == Some(image::ImageFormat::Jpeg) {
+        match crate::jpeg::decode(path)? {
+            Some(image) => image,
+            None => DynamicImage::from_decoder(decoder)?,
+        }
+    } else {
+        DynamicImage::from_decoder(decoder)?
+    };
     image.apply_orientation(orientation);
     normalize(image, profile.as_deref(), nearest)
 }

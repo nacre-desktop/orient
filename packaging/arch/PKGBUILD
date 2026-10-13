@@ -9,7 +9,7 @@ arch=('x86_64' 'aarch64')
 url='https://github.com/nacre-desktop/orient'
 license=('MIT')
 depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
-makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git')
+makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git' 'cmake')
 checkdepends=('ffmpeg')
 optdepends=('ffmpeg: video frame sampling')
 _revision=b7ac52c83bdb2922be0c329b70a7ce5fb531d730
@@ -48,8 +48,11 @@ package_python-orient-colors() {
 package_orient() {
   pkgdesc='Standalone wallpaper color engine and theme templates'
   depends=('lcms2' 'glibc' 'gcc-libs')
+  license=('MIT' 'BSD-3-Clause' 'IJG' 'Zlib')
   optdepends=('ffmpeg: video frame sampling')
   cd "$_srcdir"
+  install -Dm644 NOTICE "$pkgdir/usr/share/licenses/$pkgname/NOTICE"
+  install -Dm644 third-party/libjpeg-turbo-LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/libjpeg-turbo-LICENSE.md"
   install -Dm755 target/release/orient "$pkgdir/usr/bin/orient"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

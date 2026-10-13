@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Match Pillow thumbnail arithmetic, restoring exact native gallery palettes.
+- Match Pillow thumbnail arithmetic and JPEG draft decoding, restoring exact
+  native gallery and tested wallpaper palettes.
   Add a fingerprinted JSON interface for native desktop consumers and safe
   decoder subprocess cancellation.
 

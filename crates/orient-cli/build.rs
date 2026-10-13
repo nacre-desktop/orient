@@ -11,6 +11,10 @@ fn main() {
         println!("cargo:rerun-if-changed={}", file.display());
         hash.update(fs::read(file).unwrap());
     }
+    for file in ["Cargo.toml", "../../Cargo.lock"] {
+        println!("cargo:rerun-if-changed={file}");
+        hash.update(fs::read(file).unwrap());
+    }
     let templates = Path::new("../../src/orient/templates");
     println!("cargo:rerun-if-changed={}", templates.display());
     println!("cargo:rustc-env=ORIENT_DECODER_HASH={:x}", hash.finalize());

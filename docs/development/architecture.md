@@ -58,7 +58,8 @@ frozen pixel references keep the native contract independent of CI's Pillow vers
 Pixel tests cover RGB, RGBA, grayscale, grayscale-alpha and indexed PNG modes, BMP/TIFF/WebP and animated GIF mode promotion,
 integer reduction, narrow images and rounding boundaries. The resize arithmetic
 was independently implemented from Pillow's documented/source behavior; no
-Pillow code is linked into the binary. JPEG draft decoding, ICC conversion and
+Pillow code is linked into the binary. RGB/grayscale JPEG uses bundled libjpeg-turbo with the same 512px draft request
+before EXIF/thumbnail processing. ICC conversion and
 additional animation formats can still differ. No core thresholds or comparison
 tolerances changed.
 
@@ -94,3 +95,10 @@ small native RSS helper avoids counting inherited Python harness pages.
 The native cancellation adapter uses `ctrlc` (MIT/Apache-2.0), `nix` (MIT),
 `dispatch2` (Zlib/Apache-2.0/MIT) and `objc2` (MIT); the latter two are
 target-specific dependencies. `gif` (MIT/Apache-2.0) supplies frame metadata.
+
+JPEG decoding uses `turbojpeg` and `turbojpeg-sys` under their MIT license option,
+with `cmake` (MIT/Apache-2.0) building the bundled native codec. Libjpeg-turbo's
+BSD-style/IJG/Zlib notices ship with the native command; Orient-owned code remains
+MIT. CMake and a C compiler are needed for CLI source builds, not for the abi3 wheel.
+The cancellation adapter's additional target dependencies `block2` and
+`objc2-encode` are MIT licensed.

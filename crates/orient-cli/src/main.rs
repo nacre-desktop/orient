@@ -1,5 +1,6 @@
 mod decoder;
 mod export;
+mod jpeg;
 mod resample;
 mod rpc;
 mod storage;

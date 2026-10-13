@@ -20,6 +20,31 @@ BINARY = ROOT / "target/release/orient"
 
 @unittest.skipUnless(EXAMPLE.is_file(), "Build the native normalization diagnostic")
 class NativeNormalizationTests(unittest.TestCase):
+    def test_jpeg_draft_scaling_subsampling_and_exif(self):
+        rng = random.Random(3501)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cases = (
+                ((257, 193), "RGB", 2, False, 1),
+                ((1750, 1040), "RGB", 2, False, 1),
+                ((2053, 2051), "RGB", 1, True, 6),
+                ((4097, 4099), "L", 0, False, 1),
+                ((1025, 1027), "RGB", 0, False, 8),
+            )
+            for index, (size, mode, subsampling, progressive, orientation) in enumerate(cases):
+                bands = Image.getmodebands(mode)
+                image = Image.frombytes(mode, size, rng.randbytes(size[0] * size[1] * bands))
+                exif = Image.Exif()
+                exif[274] = orientation
+                path = root / f"draft-{index}.jpg"
+                image.save(path, quality=87, subsampling=subsampling, progressive=progressive, exif=exif)
+                subprocess.run([str(EXAMPLE), str(path), str(root / "decoded")], check=True, capture_output=True)
+                actual = Image.open(root / "decoded/0.png").convert("RGBA")
+                expected = normalize(path)
+                with self.subTest(size=size, mode=mode, subsampling=subsampling, orientation=orientation):
+                    self.assertEqual(actual.size, expected.size)
+                    self.assertEqual(actual.tobytes(), expected.tobytes())
+
     def test_lossless_codecs_and_animated_mode_promotion(self):
         rng = random.Random(99)
         with tempfile.TemporaryDirectory() as directory:

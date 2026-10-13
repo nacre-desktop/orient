@@ -43,7 +43,7 @@ The wheel no longer installs an `orient` console script. Python keeps Pillow
 image decoding and exactly preserves the original palettes.
 
 The standalone `orient` binary needs no Python. Build it with Rust and the LCMS2
-development library available:
+development library, CMake and a C compiler available:
 
 ```sh
 cargo build --release --locked -p orient-cli
@@ -52,7 +52,7 @@ cargo build --release --locked -p orient-cli
 
 Its decoder supports PNG, JPEG, WebP, GIF, BMP and TIFF; FFmpeg enables video
 sampling. The gallery palettes match Pillow exactly; JPEG and some other decoding
-paths can still differ. See the
+paths outside the tested decoder contract can still differ. See the
 [decoder measurements](tests/parity/decoder-report.json) and
 [architecture note](docs/development/architecture.md). Arch provides separate
 [`orient` and `python-orient-colors` packages](packaging/arch/).

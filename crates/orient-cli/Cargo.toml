@@ -16,6 +16,7 @@ orient-core = { path = "../orient-core" }
 serde_json.workspace = true
 image = { version = "=0.25.9", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"] }
 gif = "0.14"
+turbojpeg = { version = "=1.5.1", default-features = false, features = ["cmake"] }
 lcms2 = "6"
 clap = { version = "4", features = ["derive"] }
 sha2 = "0.10"

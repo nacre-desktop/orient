@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg liblcms2-dev pkg-config
+          sudo apt-get install -y ffmpeg liblcms2-dev pkg-config cmake
           cargo build --release --locked -p orient-cli --bins --example normalized_frames
           python -m pip install . "pillow==${{ matrix.pillow }}" ruff==0.16.10 build
       - name: Lint, test and build
