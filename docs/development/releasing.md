@@ -28,10 +28,14 @@ names alone do not enforce approval. Never approve production through automation
    checksum. Any included source/doc change requires rebuilding and a new checksum.
 4. CI installs the built wheel in fresh Python 3.13/3.14 venvs, runs
    `scripts/smoke_wheel.py` with the public coast-day fixture, and builds Arch in a
-   clean devtools chroot. Arch PR validation substitutes this run's local sdist
-   for its eventual GitHub release URL; it still enforces the committed checksum.
-5. Open one PR with validation evidence and the Arch name `python-orient-colors`
-   in its packaging handoff. Merge only once required checks pass.
+   clean devtools chroot. Development CI verifies the build job's recorded
+   SHA-256 and pins its temporary Arch recipe to that snapshot archive. The
+   committed recipe keeps the immutable release URL and release checksum;
+   update both when preparing the next release, not for ordinary development.
+5. During experimental development, validate and integrate directly into current
+   `main`, push normally, and check CI. Include validation evidence and the Arch
+   name `python-orient-colors` in the packaging handoff. Use a PR only when
+   explicitly requested, as described in CONTRIBUTING.
 
 ## Publish
 
@@ -65,7 +69,8 @@ python3 -m venv /tmp/orient-test
 /tmp/orient-test/bin/orient --version
 ```
 
-Finally open a separate minimal Nacre PR updating only its Orient submodule and
-matching explicit pin to the release tag. Share the Arch artifact/name with its
-packager. Update [release progress](progress/release.md) with run/PR links,
+Finally integrate a separate minimal Nacre change updating only its Orient
+submodule and matching explicit pin to the release tag, following its current
+publication policy. Share the Arch artifact/name with its packager.
+Update [release progress](progress/release.md) with run/commit links,
 results and any remaining maintainer actions.

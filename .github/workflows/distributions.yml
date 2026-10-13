@@ -6,12 +6,15 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    outputs:
+      source_sha256: ${{ steps.build-distributions.outputs.source_sha256 }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.13"
       - name: Build sdist and wheel from sdist; check metadata
+        id: build-distributions
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
@@ -21,6 +24,8 @@ jobs:
           python -m unittest discover -s tests
           python -m build
           python -m twine check --strict dist/*
+          source_digest=$(sha256sum dist/*.tar.gz | cut -d ' ' -f 1)
+          printf 'source_sha256=%s\n' "$source_digest" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: python-distributions
@@ -58,12 +63,17 @@ jobs:
           name: python-distributions
           path: dist
       - name: Build with Arch devtools in a clean chroot
+        env:
+          SOURCE_SHA256: ${{ needs.build.outputs.source_sha256 }}
         run: |
           mkdir "$RUNNER_TEMP/arch"
+          # Verify this run's development archive against the build job's digest.
+          printf '%s  %s\n' "$SOURCE_SHA256" dist/*.tar.gz | sha256sum --check
           cp packaging/arch/PKGBUILD dist/*.tar.gz "$RUNNER_TEMP/arch/"
-          # PR validation uses this run's sdist, before GitHub release assets exist.
-          # Only the source URL changes; the committed checksum is still verified.
+          # Development CI packages the snapshot, not the immutable release asset.
+          # Keep the committed release URL/checksum intact; pin only this CI copy.
           sed -i 's|source=(.*|source=("orient_colors-${_pyver}.tar.gz")|' "$RUNNER_TEMP/arch/PKGBUILD"
+          sed -i "s|^sha256sums=.*|sha256sums=('$SOURCE_SHA256')|" "$RUNNER_TEMP/arch/PKGBUILD"
           # Devtools assigns systemd slices, so its container host needs systemd
           # as PID 1, not just an interactive shell with a machine ID.
           container=$(docker run --detach --privileged --cgroupns=host --tmpfs /run --tmpfs /tmp \
