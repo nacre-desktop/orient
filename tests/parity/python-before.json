@@ -1,0 +1,44 @@
+[
+  {
+    "image": "coast-day.png",
+    "median_seconds": 0.08927752800809685,
+    "peak_rss_kib": 28844,
+    "runs": 3
+  },
+  {
+    "image": "mist-forest.png",
+    "median_seconds": 0.07277129100111779,
+    "peak_rss_kib": 28588,
+    "runs": 3
+  },
+  {
+    "image": "monochrome.png",
+    "median_seconds": 0.06602328798908275,
+    "peak_rss_kib": 28408,
+    "runs": 3
+  },
+  {
+    "image": "moving-lantern.gif",
+    "median_seconds": 0.15874863500357606,
+    "peak_rss_kib": 29384,
+    "runs": 3
+  },
+  {
+    "image": "neon-scene.png",
+    "median_seconds": 0.08182041899999604,
+    "peak_rss_kib": 28624,
+    "runs": 3
+  },
+  {
+    "image": "night-city.png",
+    "median_seconds": 0.07792493699525949,
+    "peak_rss_kib": 28628,
+    "runs": 3
+  },
+  {
+    "image": "warm-room.png",
+    "median_seconds": 0.08346331700158771,
+    "peak_rss_kib": 28688,
+    "runs": 3
+  }
+]

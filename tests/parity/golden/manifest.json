@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "seed": 8675309,
+  "reference": {
+    "version": "0.1.0.dev5",
+    "engine": "orient-0.1.0.dev5-afcee06bbbf9"
+  },
+  "images": 47,
+  "palettes": 1410,
+  "defaults": 36,
+  "generated": 30,
+  "templates": 26,
+  "expressions": 83,
+  "ignored_fields": [
+    "engine",
+    "path"
+  ]
+}
