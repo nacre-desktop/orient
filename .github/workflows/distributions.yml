@@ -75,9 +75,10 @@ jobs:
           printf '%s  %s\n' "$SOURCE_SHA256" dist/*.tar.gz | sha256sum --check
           cp packaging/arch/PKGBUILD dist/*.tar.gz "$RUNNER_TEMP/arch/"
           # Development CI packages the snapshot, not the immutable release asset.
-          # Keep the committed release URL/checksum intact; pin only this CI copy.
+          # The committed development recipe uses a fixed Git revision.
           sed -i 's|source=(.*|source=("orient_colors-${_pyver}.tar.gz")|' "$RUNNER_TEMP/arch/PKGBUILD"
           sed -i "s|^sha256sums=.*|sha256sums=('$SOURCE_SHA256')|" "$RUNNER_TEMP/arch/PKGBUILD"
+          sed -i 's|^_srcdir=.*|_srcdir="orient_colors-${_pyver}"|' "$RUNNER_TEMP/arch/PKGBUILD"
           # Devtools assigns systemd slices, so its container host needs systemd
           # as PID 1, not just an interactive shell with a machine ID.
           container=$(docker run --detach --privileged --cgroupns=host --tmpfs /run --tmpfs /tmp \

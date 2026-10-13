@@ -9,27 +9,29 @@ arch=('x86_64' 'aarch64')
 url='https://github.com/nacre-desktop/orient'
 license=('MIT')
 depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
-makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2')
+makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git')
 checkdepends=('ffmpeg')
 optdepends=('ffmpeg: video frame sampling')
-_tag="v${_pyver/.dev/-dev.}"
-source=("orient_colors-${_pyver}.tar.gz::${url}/releases/download/${_tag}/orient_colors-${_pyver}.tar.gz")
-sha256sums=('58ec261d8c0d5888796ff46775f243dbfa6a11253ea9fa4f97bc65c57aba5b8b')
+_revision=b7ac52c83bdb2922be0c329b70a7ce5fb531d730
+_srcdir=orient
+source=("orient::git+${url}.git#commit=${_revision}")
+sha256sums=('SKIP')
 
 build() {
-  cd "orient_colors-${_pyver}"
-  cargo build --release --locked -p orient-cli
+  cd "$_srcdir"
+  cargo build --release --locked -p orient-cli --bins --example normalized_frames
   python -m build --wheel --no-isolation
 }
 
 check() {
-  cd "orient_colors-${_pyver}"
+  cd "$_srcdir"
   # Install without network into an isolated prefix, then exercise the entry point
   # and package data rather than falling back to the source checkout.
   python -m venv --system-site-packages "${srcdir}/smoke-venv"
   "${srcdir}/smoke-venv/bin/python" -m installer dist/*.whl
   cargo test --locked --quiet
   target/release/orient --version
+  "${srcdir}/smoke-venv/bin/python" tests/parity/check_native_golden.py -q
   "${srcdir}/smoke-venv/bin/python" -m unittest discover -s tests
   "${srcdir}/smoke-venv/bin/python" tests/parity/check_golden.py -q
   "${srcdir}/smoke-venv/bin/python" -I scripts/smoke_wheel.py \
@@ -38,7 +40,7 @@ check() {
 
 package_python-orient-colors() {
   depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
-  cd "orient_colors-${_pyver}"
+  cd "$_srcdir"
   python -m installer --destdir="$pkgdir" dist/*.whl
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
@@ -47,7 +49,7 @@ package_orient() {
   pkgdesc='Standalone wallpaper color engine and theme templates'
   depends=('lcms2' 'glibc' 'gcc-libs')
   optdepends=('ffmpeg: video frame sampling')
-  cd "orient_colors-${_pyver}"
+  cd "$_srcdir"
   install -Dm755 target/release/orient "$pkgdir/usr/bin/orient"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

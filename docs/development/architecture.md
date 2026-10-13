@@ -34,9 +34,9 @@ python -m build
 
 `python -m build` creates an sdist and builds its wheel. Test that wheel with
 `scripts/smoke_wheel.py` in a clean virtual environment before distribution.
-The Arch workflow similarly validates the newly built sdist; the recipe's
-release URL/checksum continues to identify the published dev5 archive until
-the maintainer prepares a future release.
+The Arch workflow similarly validates the newly built sdist; the development recipe
+pins a tested Git revision rather than the old Python-only dev5 release archive.
+A maintainer must prepare an immutable archive pin for a future release.
 
 The standalone CLI uses the `image` codecs, LCMS2 for ICC conversion, and a
 Pillow-compatible integer reduction and Lanczos thumbnail. GIF/video sampling uses four fixed temporal points. A
