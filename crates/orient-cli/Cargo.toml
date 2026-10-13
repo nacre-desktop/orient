@@ -1,0 +1,25 @@
+[package]
+name = "orient-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "orient"
+path = "src/main.rs"
+
+[dependencies]
+orient-core = { path = "../orient-core" }
+serde_json.workspace = true
+image = { version = "=0.25.9", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"] }
+lcms2 = "6"
+clap = { version = "4", features = ["derive"] }
+sha2 = "0.10"
+tempfile = "3"
+nix = { version = "0.30", features = ["signal", "process"] }
+include_dir = "0.7"
+
+[build-dependencies]
+sha2 = "0.10"

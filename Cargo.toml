@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/orient-core", "crates/orient-py"]
+members = ["crates/orient-core", "crates/orient-py", "crates/orient-cli"]
 resolver = "2"
 
 [workspace.package]

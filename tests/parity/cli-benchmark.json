@@ -1,0 +1,172 @@
+{
+  "binary_bytes": 6511056,
+  "startup": [
+    {
+      "implementation": "python_before",
+      "runs": 10,
+      "median_ms": 51.215998500083515,
+      "peak_rss_kib": 26068
+    },
+    {
+      "implementation": "python_rust_core",
+      "runs": 10,
+      "median_ms": 50.18124349999198,
+      "peak_rss_kib": 27656
+    },
+    {
+      "implementation": "rust_binary",
+      "runs": 10,
+      "median_ms": 0.6890999998176994,
+      "peak_rss_kib": 4248
+    }
+  ],
+  "cache_miss": [
+    {
+      "implementation": "python_before",
+      "image": "coast-day.png",
+      "runs": 3,
+      "median_ms": 137.07863699983136,
+      "peak_rss_kib": 29144
+    },
+    {
+      "implementation": "python_before",
+      "image": "mist-forest.png",
+      "runs": 3,
+      "median_ms": 116.38369699994655,
+      "peak_rss_kib": 28776
+    },
+    {
+      "implementation": "python_before",
+      "image": "monochrome.png",
+      "runs": 3,
+      "median_ms": 111.21175000062067,
+      "peak_rss_kib": 28692
+    },
+    {
+      "implementation": "python_before",
+      "image": "moving-lantern.gif",
+      "runs": 3,
+      "median_ms": 188.26011200053472,
+      "peak_rss_kib": 28956
+    },
+    {
+      "implementation": "python_before",
+      "image": "neon-scene.png",
+      "runs": 3,
+      "median_ms": 121.12935599998309,
+      "peak_rss_kib": 28484
+    },
+    {
+      "implementation": "python_before",
+      "image": "night-city.png",
+      "runs": 3,
+      "median_ms": 117.38402899936773,
+      "peak_rss_kib": 28488
+    },
+    {
+      "implementation": "python_before",
+      "image": "warm-room.png",
+      "runs": 3,
+      "median_ms": 121.03356499937945,
+      "peak_rss_kib": 28708
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "coast-day.png",
+      "runs": 3,
+      "median_ms": 66.5326920006919,
+      "peak_rss_kib": 32412
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "mist-forest.png",
+      "runs": 3,
+      "median_ms": 66.46763199933048,
+      "peak_rss_kib": 32016
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "monochrome.png",
+      "runs": 3,
+      "median_ms": 64.62079100037954,
+      "peak_rss_kib": 31864
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "moving-lantern.gif",
+      "runs": 3,
+      "median_ms": 65.7100670005093,
+      "peak_rss_kib": 31452
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "neon-scene.png",
+      "runs": 3,
+      "median_ms": 65.29010699978244,
+      "peak_rss_kib": 31788
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "night-city.png",
+      "runs": 3,
+      "median_ms": 64.71479799984081,
+      "peak_rss_kib": 31644
+    },
+    {
+      "implementation": "python_rust_core",
+      "image": "warm-room.png",
+      "runs": 3,
+      "median_ms": 64.67845799943461,
+      "peak_rss_kib": 31904
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "coast-day.png",
+      "runs": 3,
+      "median_ms": 12.716408999949635,
+      "peak_rss_kib": 8584
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "mist-forest.png",
+      "runs": 3,
+      "median_ms": 10.183800000049814,
+      "peak_rss_kib": 8464
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "monochrome.png",
+      "runs": 3,
+      "median_ms": 9.446142999877338,
+      "peak_rss_kib": 8348
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "moving-lantern.gif",
+      "runs": 3,
+      "median_ms": 10.89229700028227,
+      "peak_rss_kib": 8064
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "neon-scene.png",
+      "runs": 3,
+      "median_ms": 10.035751000032178,
+      "peak_rss_kib": 8324
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "night-city.png",
+      "runs": 3,
+      "median_ms": 9.761065999555285,
+      "peak_rss_kib": 8392
+    },
+    {
+      "implementation": "rust_binary",
+      "image": "warm-room.png",
+      "runs": 3,
+      "median_ms": 10.08000300043932,
+      "peak_rss_kib": 8256
+    }
+  ]
+}
