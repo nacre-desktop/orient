@@ -5,6 +5,8 @@ permissions:
 jobs:
   engine:
     runs-on: ubuntu-latest
+    env:
+      CARGO_BUILD_JOBS: "2"
     strategy:
       matrix:
         include:
@@ -24,9 +26,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg liblcms2-dev pkg-config cmake
-          cargo build --release --locked -p orient-cli --bins --example normalized_frames
-          python -m pip install . "pillow==${{ matrix.pillow }}" ruff==0.16.10 build
+          sudo apt-get install -y ffmpeg liblcms2-dev pkg-config cmake fish tmux
+          nice -n 10 cargo build --release --locked -j2 -p orient-cli --bins --example normalized_frames
+          python -m pip install . "pillow==${{ matrix.pillow }}" ruff==0.16.10 build -r tests/template-parsers.txt
       - name: Lint, test and build
         run: |
           ruff format --check .
@@ -35,8 +37,8 @@ jobs:
           python tests/parity/check_native_golden.py -q
           python tests/parity/check_golden.py -q
           cargo fmt --check
-          cargo clippy -- -D warnings
-          cargo test --quiet
+          nice -n 10 cargo clippy -j2 -- -D warnings
+          nice -n 10 cargo test -j2 --quiet
           python -m build
 
   distributions:

@@ -1,0 +1,7 @@
+# Test-only dependencies; the binary and Python library do not require these.
+tinycss2==1.4.0
+kdl-py==1.2.0
+PyYAML==6.0.3
+luaparser==4.0.1
+# Bundled Hyprlang grammar; this version does not download parsers at runtime.
+tree-sitter-language-pack==0.10.0
