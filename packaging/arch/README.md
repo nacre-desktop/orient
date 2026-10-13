@@ -1,33 +1,30 @@
-# Arch Linux: python-orient-colors
+# Arch Linux packages
 
-Orient provides both a Python library and a CLI; its Arch package is
-`python-orient-colors`, following
-[Arch's Python naming/build guidelines](https://wiki.archlinux.org/title/Python_package_guidelines).
-PyPI distribution: `orient-colors`; import and command: `orient`.
-The recipe is provided here; it is not yet submitted to the AUR or an official
-Arch repository. Nacre packagers should depend on `python-orient-colors` and use
-an exact version when their tested integration requires one.
+The split recipe provides `orient` (standalone Rust command, no Python runtime)
+and `python-orient-colors` (Python library plus `python -m orient`, with Pillow).
+Install both for callers needing both interfaces. Nacre's library dependency
+remains `python-orient-colors`; packagers using the standalone command also need
+`orient`. Wheels no longer install a competing `orient` console script.
 
-The package builds with PEP 517 (`python-build`/Hatchling) and installs with
-`python-installer`. Pillow is required; FFmpeg is optional for users sampling
-video, and a check dependency for the video tests. No pip command runs in the
-package build, and no desktop session is required. `pkgver=0.1.0dev5` sorts before final `0.1.0` with Arch vercmp;
-Python metadata/source archives keep the PEP 440 spelling `0.1.0.dev5`. Rebuild on Arch Python minor upgrades.
-
-Install `devtools`, then run from this directory:
+Both packages support x86_64 and aarch64. Builds use Rust, LCMS2 and
+PEP 517/maturin; Python installation uses `python-installer`. FFmpeg is optional
+at runtime and required for video tests. No pip command runs in the package
+build and no desktop session is required.
 
 ```sh
 extra-x86_64-build
-sudo pacman -U ./python-orient-colors-*.pkg.tar.zst
+sudo pacman -U ./orient-*.pkg.tar.zst ./python-orient-colors-*.pkg.tar.zst
 orient --version
+python -m orient --version
 ```
 
-Devtools creates/updates a clean stock-Arch chroot and needs sudo for that
-isolation. Build users remain unprivileged. CI uses a disposable privileged
-container to host the clean chroot; it changes no developer host packages.
-See [Arch's chroot instructions](https://wiki.archlinux.org/title/DeveloperWiki:Building_in_a_clean_chroot).
+Devtools needs sudo to create its stock-Arch clean chroot; CI hosts it in a
+disposable privileged container. The committed release URL/checksum identifies
+the published dev5 sdist. Development CI builds and verifies the current snapshot
+with its separately recorded artifact digest, then substitutes that snapshot into
+the temporary recipe. A future maintainer release must refresh the release pin;
+this migration does not upload packages, change versions or create tags.
 
-The release sdist is fetched from GitHub and verified by SHA-256. Its exact
-contents are used for tests and packaging. On PRs, CI uses the candidate's built
-sdist with the same checksum, before the release asset exists. Regenerate
+PyPI uses `0.1.0.dev5`; Arch uses `0.1.0dev5` so it sorts before final `0.1.0`.
+The recipe has not been submitted to the AUR or an official repository. Regenerate
 `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO` after recipe changes.

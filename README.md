@@ -6,7 +6,7 @@
 **[Development preview · 0.1.0-dev.5](https://github.com/nacre-desktop/orient/releases/tag/v0.1.0-dev.5).** The engine works and has regression tests;
 its public packaging/API is being stabilized before a 1.0 release.
 
-Orient is a standalone Python library and CLI. It analyzes images or sampled
+Orient is a Rust color engine with a Python library and a standalone CLI. It analyzes images or sampled
 animation frames, preserves source color families, and creates readable dark/light
 palettes. It does not require Hyprland, Quickshell, Nacre, a display server or a
 running desktop. [Nacre](https://github.com/nacre-desktop/nacre) is one consumer.
@@ -18,12 +18,12 @@ Python 3.13+ is required. Once the maintainer approves the PyPI release:
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install --pre orient-colors
-.venv/bin/orient --version
-.venv/bin/orient palette wallpaper.jpg --personality natural --mode dark > palette.json
-.venv/bin/orient analyze wallpaper.jpg
-.venv/bin/orient sample wallpaper.jpg 0.5 0.5
-.venv/bin/orient export palette.json ./themes
-.venv/bin/orient render palette.json ./my-template.css > ./colors.css
+.venv/bin/python -m orient --version
+.venv/bin/python -m orient palette wallpaper.jpg --personality natural --mode dark > palette.json
+.venv/bin/python -m orient analyze wallpaper.jpg
+.venv/bin/python -m orient sample wallpaper.jpg 0.5 0.5
+.venv/bin/python -m orient export palette.json ./themes
+.venv/bin/python -m orient render palette.json ./my-template.css > ./colors.css
 ```
 
 Development previews need `--pre` or an exact version pin. Stable releases use
@@ -38,9 +38,23 @@ python3 -m venv .venv
 .venv/bin/python -m pip install .
 ```
 
-The distribution name is `orient-colors`; the command and import module are
-`orient`. FFmpeg enables video frame sampling; still images and animated GIFs
-use Pillow. Arch's package recipe is [python-orient-colors](packaging/arch/).
+The distribution name is `orient-colors`; import `orient` or run `python -m orient`.
+The wheel no longer installs an `orient` console script. Python keeps Pillow
+image decoding and exactly preserves the original palettes.
+
+The standalone `orient` binary needs no Python. Build it with Rust and the LCMS2
+development library available:
+
+```sh
+cargo build --release --locked -p orient-cli
+./target/release/orient palette wallpaper.jpg --personality natural
+```
+
+Its decoder supports PNG, JPEG, WebP, GIF, BMP and TIFF; FFmpeg enables video
+sampling. Rust decoding can produce different colors from Pillow. See the
+[decoder measurements](tests/parity/decoder-report.json) and
+[architecture note](docs/development/architecture.md). Arch provides separate
+[`orient` and `python-orient-colors` packages](packaging/arch/).
 
 ## Python library
 

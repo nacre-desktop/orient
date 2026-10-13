@@ -5,6 +5,9 @@
 - Move deterministic engine calculations into Rust with abi3 Python bindings.
   Preserve Pillow decoding, Python API, palette colors and template output.
   Source builds now require Rust and maturin.
+- Add the standalone Rust `orient` binary with LCMS2 conversion and bounded video
+  decoding. The wheel retains `python -m orient` and drops its console script;
+  Arch splits the binary and Python library. Pillow remains Python's decoder.
 
 ## 0.1.0-dev.5
 

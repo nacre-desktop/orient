@@ -8,7 +8,6 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-import sysconfig
 import tempfile
 
 
@@ -40,7 +39,6 @@ def smoke(fixture, expected_version):
         "vscode-theme.json.in",
     ], names
     assert "spotify/color.ini.in" in names and "firefox/manifest.json.in" in names
-    cli = Path(sysconfig.get_path("scripts")) / "orient"
     with tempfile.TemporaryDirectory(prefix="orient-wheel-") as folder:
         root = Path(folder)
         env = dict(os.environ, XDG_CACHE_HOME=str(root / "cache"))
@@ -49,7 +47,12 @@ def smoke(fixture, expected_version):
 
         def run(*args):
             result = subprocess.run(
-                [str(cli), *map(str, args)], cwd=root, env=env, capture_output=True, text=True, timeout=60
+                [sys.executable, "-m", "orient", *map(str, args)],
+                cwd=root,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
             if result.returncode:
                 raise AssertionError(result.stderr)

@@ -23,15 +23,15 @@ classifiers = [
 Homepage = "https://github.com/nacre-desktop/orient"
 Issues = "https://github.com/nacre-desktop/orient/issues"
 
-[project.scripts]
-orient = "orient.cli:main"
-
 [tool.maturin]
+sdist-generator = "git"
 manifest-path = "crates/orient-py/Cargo.toml"
 python-source = "src"
 module-name = "orient._core"
 features = ["pyo3/extension-module"]
 include = [
+  { path = "crates/orient-cli/**/*", format = "sdist" },
+  { path = "Cargo.toml", format = "sdist" },
   { path = "tests/**/*", format = "sdist" },
   { path = "scripts/*", format = "sdist" },
   { path = "docs/**/*", format = "sdist" },
@@ -39,7 +39,7 @@ include = [
   { path = "CHANGELOG.md", format = "sdist" },
   { path = "Cargo.lock", format = "sdist" },
 ]
-exclude = ["docs/development/progress/**"]
+exclude = ["docs/development/progress/**", "packaging/arch/**"]
 
 [tool.ruff]
 target-version = "py313"

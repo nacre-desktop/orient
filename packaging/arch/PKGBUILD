@@ -1,5 +1,6 @@
 # Maintainer: Nacre contributors <nacre-desktop@users.noreply.github.com>
-pkgname=python-orient-colors
+pkgbase=orient
+pkgname=('orient' 'python-orient-colors')
 pkgver=0.1.0dev5
 _pyver=0.1.0.dev5
 pkgrel=1
@@ -8,7 +9,7 @@ arch=('x86_64' 'aarch64')
 url='https://github.com/nacre-desktop/orient'
 license=('MIT')
 depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
-makedepends=('python-build' 'python-installer' 'rust' 'python-maturin')
+makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2')
 checkdepends=('ffmpeg')
 optdepends=('ffmpeg: video frame sampling')
 _tag="v${_pyver/.dev/-dev.}"
@@ -17,6 +18,7 @@ sha256sums=('58ec261d8c0d5888796ff46775f243dbfa6a11253ea9fa4f97bc65c57aba5b8b')
 
 build() {
   cd "orient_colors-${_pyver}"
+  cargo build --release --locked -p orient-cli
   python -m build --wheel --no-isolation
 }
 
@@ -26,14 +28,26 @@ check() {
   # and package data rather than falling back to the source checkout.
   python -m venv --system-site-packages "${srcdir}/smoke-venv"
   "${srcdir}/smoke-venv/bin/python" -m installer dist/*.whl
+  cargo test --locked --quiet
+  target/release/orient --version
   "${srcdir}/smoke-venv/bin/python" -m unittest discover -s tests
   "${srcdir}/smoke-venv/bin/python" tests/parity/check_golden.py -q
   "${srcdir}/smoke-venv/bin/python" -I scripts/smoke_wheel.py \
     "$PWD/tests/orient-gallery/images/coast-day.png" --version "$_pyver"
 }
 
-package() {
+package_python-orient-colors() {
+  depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
   cd "orient_colors-${_pyver}"
   python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+package_orient() {
+  pkgdesc='Standalone wallpaper color engine and theme templates'
+  depends=('lcms2' 'glibc' 'gcc-libs')
+  optdepends=('ffmpeg: video frame sampling')
+  cd "orient_colors-${_pyver}"
+  install -Dm755 target/release/orient "$pkgdir/usr/bin/orient"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
