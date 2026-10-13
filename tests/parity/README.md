@@ -27,3 +27,11 @@ a porting discrepancy. Rust tests consume the same reference and PNG frames.
 `benchmark.py` runs each gallery image three times in fresh processes and caches.
 It measures `from_image` wall time (including decode and cache writes) and Linux
 process peak RSS in KiB. Run both implementations with the same Pillow/Python.
+
+`pillow-12.3` freezes two additional thumbnail pixel references for RGBA/LA
+31×4000 inputs. `test_native_normalization.py` generates their inputs with seed
+1729, in its fixed mode/size order. Pillow 11 and 12.3 order the two resize passes
+differently for these extreme aspect ratios. Native decoding follows Nacre's
+locked Pillow 12.3 baseline, so every CI row compares these exact frozen pixels.
+The Python library continues to use its installed Pillow. No pixel tolerance or
+color comparison is relaxed; the original 47-image fixtures remain unchanged.

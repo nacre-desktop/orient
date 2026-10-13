@@ -52,6 +52,9 @@ LCMS2 is a native dependency. Arch `orient` supplies the command;
 `tests/parity/decoder-report.json` records all roles across both modes and all
 personalities for each gallery image. the seven gallery wallpapers now match Pillow exactly for all 112 combinations
 of mode and personality, including the formerly divergent accent choices.
+Native thumbnail arithmetic targets Nacre's pinned Pillow 12.3. Pillow 11
+orders resize passes differently for extremely tall transparent images; two
+frozen pixel references keep the native contract independent of CI's Pillow version.
 Pixel tests cover RGB, RGBA, grayscale, grayscale-alpha and indexed PNG modes, BMP/TIFF/WebP and animated GIF mode promotion,
 integer reduction, narrow images and rounding boundaries. The resize arithmetic
 was independently implemented from Pillow's documented/source behavior; no
