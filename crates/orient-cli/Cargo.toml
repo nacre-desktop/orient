@@ -13,15 +13,12 @@ path = "src/main.rs"
 [dependencies]
 ctrlc = { version = "3", features = ["termination"] }
 orient-core = { path = "../orient-core" }
+orient-decoder = { path = "../orient-decoder" }
 serde_json.workspace = true
 image = { version = "=0.25.9", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"] }
-gif = "0.14"
-turbojpeg = { version = "=1.5.1", default-features = false, features = ["cmake"] }
-lcms2 = "6"
 clap = { version = "4", features = ["derive"] }
 sha2 = "0.10"
 tempfile = "3"
-nix = { version = "0.30", features = ["signal", "process"] }
 include_dir = "0.7"
 
 [build-dependencies]

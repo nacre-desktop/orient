@@ -11,7 +11,20 @@ fn main() {
         println!("cargo:rerun-if-changed={}", file.display());
         hash.update(fs::read(file).unwrap());
     }
-    for file in ["Cargo.toml", "../../Cargo.lock"] {
+    let mut decoder_files: Vec<_> = fs::read_dir("../orient-decoder/src")
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .collect();
+    decoder_files.sort();
+    for file in decoder_files {
+        println!("cargo:rerun-if-changed={}", file.display());
+        hash.update(fs::read(file).unwrap());
+    }
+    for file in [
+        "Cargo.toml",
+        "../orient-decoder/Cargo.toml",
+        "../../Cargo.lock",
+    ] {
         println!("cargo:rerun-if-changed={file}");
         hash.update(fs::read(file).unwrap());
     }

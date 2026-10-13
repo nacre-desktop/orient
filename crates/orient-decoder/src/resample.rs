@@ -1,4 +1,5 @@
 //! Pillow-compatible thumbnail arithmetic, independently implemented in Rust.
+//! Pillow copyright/permission notice: ../LICENSE-Pillow.
 //! Reference: Pillow's documented thumbnail/reduce sequence and 8-bit sampling
 //! equations (12.3.0). No Pillow source is compiled or linked into the binary.
 use image::RgbaImage;

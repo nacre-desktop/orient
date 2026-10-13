@@ -1,8 +1,8 @@
 # Versioning during 0.x
 
 Orient is a development preview. The Python distribution uses PEP 440 versions
-such as `0.1.0.dev5`; source `VERSION`, Git tags and GitHub release titles use
-`0.1.0-dev.5` / `v0.1.0-dev.5`. These identify the same release. Development
+such as `0.1.0.dev6`; source `VERSION`, Git tags and GitHub release titles use
+`0.1.0-dev.6` / `v0.1.0-dev.6`. These identify the same release. Development
 versions require `pip install --pre orient-colors` or an exact version pin.
 Once a stable version is approved on PyPI, use `pip install orient-colors`.
 

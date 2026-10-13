@@ -1,9 +1,9 @@
 [workspace]
-members = ["crates/orient-core", "crates/orient-py", "crates/orient-cli"]
+members = ["crates/orient-core", "crates/orient-py", "crates/orient-cli", "crates/orient-decoder"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0-dev.5"
+version = "0.1.0-dev.6"
 edition = "2021"
 rust-version = "1.85"
 license = "MIT"

@@ -1,18 +1,6 @@
-pub static CANCELLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-#[path = "../src/resample.rs"]
-mod resample;
-// Developer-only decoder diagnostics, outside the installed CLI surface.
-#[path = "../src/decoder.rs"]
-mod decoder;
-#[path = "../src/jpeg.rs"]
-mod jpeg;
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
-fn error(s: &str) -> Box<dyn std::error::Error + Send + Sync> {
-    std::io::Error::other(s).into()
-}
-fn fail<T>(s: &str) -> Result<T> {
-    Err(error(s))
-}
+//! Developer-only decoder diagnostics.
+use orient_decoder as decoder;
+use orient_decoder::Result;
 fn main() -> Result<()> {
     let args: Vec<_> = std::env::args().skip(1).collect();
     let path = std::path::Path::new(&args[0]);

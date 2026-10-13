@@ -653,25 +653,22 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "orient-cli"
-version = "0.1.0-dev.5"
+version = "0.1.0-dev.6"
 dependencies = [
  "clap",
  "ctrlc",
- "gif",
  "image",
  "include_dir",
- "lcms2",
- "nix 0.30.1",
  "orient-core",
+ "orient-decoder",
  "serde_json",
  "sha2",
  "tempfile",
- "turbojpeg",
 ]
 
 [[package]]
 name = "orient-core"
-version = "0.1.0-dev.5"
+version = "0.1.0-dev.6"
 dependencies = [
  "flate2",
  "indexmap",
@@ -682,8 +679,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "orient-decoder"
+version = "0.1.0-dev.6"
+dependencies = [
+ "gif",
+ "image",
+ "lcms2",
+ "nix 0.30.1",
+ "orient-core",
+ "serde_json",
+ "tempfile",
+ "turbojpeg",
+]
+
+[[package]]
 name = "orient-py"
-version = "0.1.0-dev.5"
+version = "0.1.0-dev.6"
 dependencies = [
  "orient-core",
  "pyo3",

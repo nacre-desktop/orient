@@ -1,17 +1,15 @@
-mod decoder;
+use orient_decoder as decoder;
 mod export;
-mod jpeg;
-mod resample;
 mod rpc;
 mod storage;
 use clap::{ArgAction, Parser, Subcommand};
 use orient_core::{engine, extract, palette};
+use orient_decoder::CANCELLED;
 use serde_json::{json, Value};
 use std::{
     fs,
     path::{Path, PathBuf},
 };
-pub static CANCELLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub fn engine_id() -> &'static str {
     static ID: std::sync::OnceLock<String> = std::sync::OnceLock::new();
     ID.get_or_init(|| {

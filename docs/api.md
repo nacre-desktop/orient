@@ -16,7 +16,7 @@ files = export(palette, "./themes")  # choose a new output directory
 
 | Entry point | Result and contract |
 | --- | --- |
-| `orient.__version__` | PEP 440 package version, e.g. `0.1.0.dev5`. |
+| `orient.__version__` | PEP 440 package version, e.g. `0.1.0.dev6`. |
 | `orient.FORMAT_VERSION` | Palette JSON format integer, currently `1`. |
 | `orient.ENGINE_ID` | Engine/cache fingerprint including package version and implementation hash; use equality, do not parse it. |
 | `orient.engine.from_image(path, ...)` | JSON-serializable [palette](palette-json.md) dictionary from a readable local image/animation/video. |

@@ -71,7 +71,18 @@ def compare(binary, dump_binary, output):
     rows = []
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
-        for path in sorted((ROOT / "tests/orient-gallery/images").iterdir()):
+        paths = sorted((ROOT / "tests/orient-gallery/images").iterdir())
+        # Public fixture derivatives exercise codecs absent from the gallery.
+        source = Image.open(paths[0]).convert("RGB")
+        for name, options in (
+            ("coast-day-lossless.webp", {"lossless": True}),
+            ("coast-day-lossy.webp", {"quality": 80}),
+            ("coast-day.jpg", {"quality": 85}),
+        ):
+            path = root / name
+            source.save(path, **options)
+            paths.append(path)
+        for path in paths:
             maxima = {}
             cases = []
             changed = set()
@@ -132,7 +143,13 @@ def compare(binary, dump_binary, output):
                         diagnosis["cause"] = "Lanczos thumbnail implementation (raw decoded pixels identical)"
                 else:
                     diagnosis["cause"] = (
-                        "GIF frame composition and Lanczos thumbnail; core arithmetic is exact on shared pixels"
+                        "none" if diagnosis["normalized_frames_equal"] else "GIF frame composition or thumbnail"
+                    )
+                if path.suffix == ".jpg" and not diagnosis.get("raw_pixels_equal", True):
+                    diagnosis["cause"] = (
+                        "none; raw diagnostic uses image codec, normalization uses libjpeg-turbo"
+                        if diagnosis["normalized_frames_equal"]
+                        else "JPEG decoder pixels / Pillow draft differ"
                     )
             row = {
                 "image": path.name,
@@ -147,6 +164,14 @@ def compare(binary, dump_binary, output):
                 f"{path.name}: {len(changed)} roles changed across 16 cases; max OKLab delta {row['max_oklab_delta']:.6f}; {diagnosis.get('cause', '')}"
             )
     output.write_text(json.dumps(rows, indent=2) + "\n")
+    failures = [
+        row["image"]
+        for row in rows
+        if not row["image"].endswith(".jpg")
+        and (row["changed_roles_any_case"] or row["diagnosis"].get("normalized_frames_equal") is False)
+    ]
+    if failures:
+        raise AssertionError("Non-JPEG decoder parity failed: " + ", ".join(failures))
 
 
 if __name__ == "__main__":

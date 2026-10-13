@@ -1,0 +1,17 @@
+[package]
+name = "orient-decoder"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+orient-core = { path = "../orient-core" }
+serde_json.workspace = true
+image = { version = "=0.25.9", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"] }
+tempfile = "3"
+gif = "0.14"
+turbojpeg = { version = "=1.5.1", default-features = false, features = ["cmake"] }
+lcms2 = "6"
+nix = { version = "0.30", features = ["signal", "process"] }

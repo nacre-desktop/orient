@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-dev.6 (unreleased)
+
+- Expose bounded native decoding as `orient-decoder` for direct Rust consumers.
+  Preserve Pillow thumbnail notices and freeze 55 additional normalized frames.
 
 - Match Pillow thumbnail arithmetic and JPEG draft decoding, restoring exact
   native gallery and tested wallpaper palettes.

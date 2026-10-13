@@ -4,12 +4,12 @@ build-backend = "maturin"
 
 [project]
 name = "orient-colors"
-version = "0.1.0.dev5"
+version = "0.1.0.dev6"
 description = "Wallpaper colors, readable palettes and portable theme templates"
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE", "crates/orient-decoder/LICENSE-Pillow", "third-party/libjpeg-turbo-LICENSE.md"]
 dependencies = ["pillow>=11,<13"]
 
 classifiers = [
@@ -31,6 +31,7 @@ module-name = "orient._core"
 features = ["pyo3/extension-module"]
 include = [
   { path = "crates/orient-cli/**/*", format = "sdist" },
+  { path = "crates/orient-decoder/**/*", format = "sdist" },
   { path = "Cargo.toml", format = "sdist" },
   { path = "tests/**/*", format = "sdist" },
   { path = "scripts/*", format = "sdist" },

@@ -4,3 +4,6 @@ The standalone command includes libjpeg-turbo under its permissive BSD-style,
 IJG and Zlib licenses; see third-party/libjpeg-turbo-LICENSE.md.
 This software is based in part on the work of the Independent JPEG Group.
 Rust turbojpeg and turbojpeg-sys are used under their MIT license option.
+
+The native thumbnail arithmetic follows Pillow's MIT-CMU-licensed algorithms.
+Pillow copyright and permission notices: crates/orient-decoder/LICENSE-Pillow.

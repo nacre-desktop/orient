@@ -2,4 +2,4 @@
 
 from ._core import ENGINE_ID as ENGINE_ID, FORMAT_VERSION as FORMAT_VERSION
 
-__version__ = "0.1.0.dev5"
+__version__ = "0.1.0.dev6"

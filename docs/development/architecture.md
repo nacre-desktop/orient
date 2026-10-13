@@ -9,7 +9,7 @@ Python modules retain the public signatures and delegate calculations to Rust.
 Pillow normalization and temporal frame sampling, ffmpeg/ffprobe subprocesses,
 cache I/O, the Python CLI and exclusive export writes remain in Python. The
 core accepts bounded RGBA frames and returns palettes, diagnostics and text.
-Engine identity combines the unchanged package version with a build-time source
+Engine identity combines the package version with a build-time source
 hash, invalidating old caches once. No desktop state is published by the engine.
 
 `tests/parity/golden` freezes the original Python outputs and normalized pixels.
@@ -38,7 +38,8 @@ The Arch workflow similarly validates the newly built sdist; the development rec
 pins a tested Git revision rather than the old Python-only dev5 release archive.
 A maintainer must prepare an immutable archive pin for a future release.
 
-The standalone CLI uses the `image` codecs, LCMS2 for ICC conversion, and a
+The standalone CLI and Rust consumers share the `orient-decoder` library,
+which uses the `image` codecs, LCMS2 for ICC conversion, and a
 Pillow-compatible integer reduction and Lanczos thumbnail. GIF/video sampling uses four fixed temporal points. A
 50-megapixel check precedes pixel allocation; high bit depth is refused. Video
 subprocesses run in separate process groups, killed/reaped after 10 s (probe)
@@ -50,8 +51,9 @@ LCMS2 is a native dependency. Arch `orient` supplies the command;
 `python-orient-colors` supplies the library and `python -m orient`.
 
 `tests/parity/decoder-report.json` records all roles across both modes and all
-personalities for each gallery image. the seven gallery wallpapers now match Pillow exactly for all 112 combinations
-of mode and personality, including the formerly divergent accent choices.
+personalities for each gallery image, plus public lossless/lossy WebP and JPEG
+derivatives. The normalized pixels and all palette roles match Pillow for all
+160 combinations, including the formerly divergent accent choices.
 Native thumbnail arithmetic targets Nacre's pinned Pillow 12.3. Pillow 11
 orders resize passes differently for extremely tall transparent images; two
 frozen pixel references keep the native contract independent of CI's Pillow version.

@@ -363,14 +363,23 @@ mod tests {
         assert!(result.unwrap_err().to_string().contains("timed out"));
         assert!(start.elapsed() < Duration::from_secs(3));
         let pid = std::fs::read_to_string(pidfile).unwrap();
-        let status = std::fs::read_to_string(format!("/proc/{}/status", pid.trim()));
-        if let Ok(status) = status {
-            assert!(
-                status
-                    .lines()
-                    .any(|line| line.starts_with("State:") && line.contains('Z')),
-                "descendant is still running"
-            );
+        // A killed descendant can close its pipes before Linux reports Z.
+        let deadline = Instant::now() + Duration::from_secs(1);
+        loop {
+            match std::fs::read_to_string(format!("/proc/{}/status", pid.trim())) {
+                Ok(status) => {
+                    if status
+                        .lines()
+                        .any(|line| line.starts_with("State:") && line.contains('Z'))
+                    {
+                        break;
+                    }
+                }
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => break,
+                Err(e) => panic!("cannot inspect descendant: {e}"),
+            }
+            assert!(Instant::now() < deadline, "descendant is still running");
+            thread::sleep(Duration::from_millis(5));
         }
     }
     #[test]
