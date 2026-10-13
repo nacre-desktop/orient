@@ -46,6 +46,17 @@ subprocesses run in separate process groups, killed/reaped after 10 s (probe)
 or 20 s (decode). Cache writes are atomic and 0600. Rust cache filenames include
 a separate decoder hash/prefix to protect Pillow-backed Python cache entries.
 
+Rust desktop consumers can also use `orient_decoder::artwork_png(path)` for
+Nacre's existing artwork staging: a raw 512px bicubic thumbnail followed by RGB
+PNG encoding, with a 16-megapixel input limit. It preserves ICC/transparency
+metadata without applying EXIF orientation or ICC conversion. JPEG draft boxes
+and CMYK conversion follow Pillow; row-by-row filtering/compression preserves
+the frozen PNG bytes. `tests/parity/media-stage` gates this separately from the
+unchanged 128px palette normalization. The library additionally decodes PNM,
+which is required by the existing artwork fixture.
+Artwork staging also preserves Pillow's 16-bit PNG handling, including its
+grayscale pre-reduction error; the palette normalization bit-depth rule remains.
+
 The binary embeds the same 13 templates. It has no Python runtime dependency;
 LCMS2 is a native dependency. Arch `orient` supplies the command;
 `python-orient-colors` supplies the library and `python -m orient`.
@@ -81,10 +92,10 @@ errors leave the server available, and EOF exits. Requests are limited to 16 MiB
 Idle servers block on stdin. Cancellation ends the server after decoder cleanup;
 consumers should discard a timed-out child and start a new one on the next call.
 
-Pillow plugin IDs outside the binary's six-format set (availability depends on
+Pillow plugin IDs outside the binary's seven-format set (availability depends on
 Pillow's build and optional tools): AVIF, BLP, BUFR, CUR, DCX, DDS, DIB, EPS,
 FITS, FLI, FTEX, GBR, GRIB, HDF5, ICNS, ICO, IM, IMT, IPTC, JPEG2000, MCIDAS,
-MPEG, MSP, PCD, PCX, PIXAR, PPM, PSD, QOI, SGI, SPIDER, SUN, TGA, WMF, XBM,
+MPEG, MSP, PCD, PCX, PIXAR, PSD, QOI, SGI, SPIDER, SUN, TGA, WMF, XBM,
 XPM and XVTHUMB. MPEG video can still use the documented ffmpeg-supported
 extensions. Animated WebP/APNG and multipage TIFF currently use their first
 frame; palette TIFF and CMYK/LAB ICC profiles are unsupported at the RGB decoder boundary.

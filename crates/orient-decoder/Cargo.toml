@@ -9,9 +9,12 @@ publish.workspace = true
 [dependencies]
 orient-core = { path = "../orient-core" }
 serde_json.workspace = true
-image = { version = "=0.25.9", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"] }
+image = { version = "=0.25.9", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff", "pnm"] }
 tempfile = "3"
 gif = "0.14"
 turbojpeg = { version = "=1.5.1", default-features = false, features = ["cmake"] }
 lcms2 = "6"
 nix = { version = "0.30", features = ["signal", "process"] }
+
+zlib-rs = "=0.6.8"
+crc32fast = "1"

@@ -57,7 +57,7 @@ fn normalize(image: DynamicImage, profile: Option<&[u8]>, nearest: bool) -> Resu
         rgba: rgba.into_raw(),
     })
 }
-fn nearest_mode(path: &Path, format: Option<image::ImageFormat>) -> Result<bool> {
+pub(crate) fn nearest_mode(path: &Path, format: Option<image::ImageFormat>) -> Result<bool> {
     let mut header = [0u8; 64];
     let mut file = File::open(path)?;
     let count = file.read(&mut header)?;

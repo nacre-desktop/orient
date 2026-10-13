@@ -4,8 +4,20 @@
 //! equations (12.3.0). No Pillow source is compiled or linked into the binary.
 use image::RgbaImage;
 const UNIT: i64 = 1 << 22;
-fn dimensions(width: u32, height: u32) -> (u32, u32) {
-    if width <= 128 && height <= 128 {
+#[derive(Clone, Copy)]
+pub enum Filter {
+    Lanczos,
+    Bicubic,
+}
+#[derive(Clone, Copy)]
+pub(crate) enum Channels {
+    Opaque,
+    Alpha,
+    Separate,
+}
+
+pub(crate) fn dimensions(width: u32, height: u32, maximum: u32) -> (u32, u32) {
+    if width <= maximum && height <= maximum {
         return (width, height);
     }
     let aspect = width as f64 / height as f64;
@@ -14,11 +26,11 @@ fn dimensions(width: u32, height: u32) -> (u32, u32) {
         let b = number.ceil();
         let error = |n: f64| {
             if horizontal {
-                (aspect - n / 128.0).abs()
+                (aspect - n / maximum as f64).abs()
             } else if n == 0.0 {
                 0.0
             } else {
-                (aspect - 128.0 / n).abs()
+                (aspect - maximum as f64 / n).abs()
             }
         };
         if error(a) <= error(b) {
@@ -28,9 +40,9 @@ fn dimensions(width: u32, height: u32) -> (u32, u32) {
         }
     };
     if 1.0 >= aspect {
-        (closest(128.0 * aspect, true), 128)
+        (closest(maximum as f64 * aspect, true), maximum)
     } else {
-        (128, closest(128.0 / aspect, false))
+        (maximum, closest(maximum as f64 / aspect, false))
     }
 }
 fn sinc(x: f64) -> f64 {
@@ -41,33 +53,15 @@ fn sinc(x: f64) -> f64 {
         angle.sin() / angle
     }
 }
-fn coefficients(input: usize, output: usize, extent: f32) -> Vec<(usize, Vec<i64>)> {
-    let scale = extent as f64 / output as f64;
-    let stretch = scale.max(1.0);
-    let support = 3.0 * stretch;
-    let inverse = 1.0 / stretch;
-    (0..output)
-        .map(|i| {
-            let center = (i as f64 + 0.5) * scale;
-            let left = ((center - support + 0.5) as i64).max(0) as usize;
-            let right = (((center + support + 0.5) as i64).max(0) as usize).min(input);
-            let mut weights = Vec::new();
-            let mut sum = 0.0;
-            for p in left..right {
-                let x = (p as f64 - center + 0.5) * inverse;
-                let weight = if (-3.0..3.0).contains(&x) {
-                    sinc(x) * sinc(x / 3.0)
-                } else {
-                    0.0
-                };
-                weights.push(weight);
-                sum += weight;
-            }
-            if sum != 0.0 {
-                for w in &mut weights {
-                    *w /= sum;
-                }
-            }
+fn coefficients(
+    input: usize,
+    output: usize,
+    extent: f32,
+    filter: Filter,
+) -> Vec<(usize, Vec<i64>)> {
+    coefficients_float(input, output, extent, filter)
+        .into_iter()
+        .map(|(left, weights)| {
             (
                 left,
                 weights
@@ -78,13 +72,124 @@ fn coefficients(input: usize, output: usize, extent: f32) -> Vec<(usize, Vec<i64
         })
         .collect()
 }
-fn pass(image: &RgbaImage, output: u32, extent: f32, horizontal: bool) -> RgbaImage {
+
+fn coefficients_float(
+    input: usize,
+    output: usize,
+    extent: f32,
+    filter: Filter,
+) -> Vec<(usize, Vec<f64>)> {
+    let scale = extent as f64 / output as f64;
+    let stretch = scale.max(1.0);
+    let radius = match filter {
+        Filter::Lanczos => 3.0,
+        Filter::Bicubic => 2.0,
+    };
+    let support = radius * stretch;
+    let inverse = 1.0 / stretch;
+    (0..output)
+        .map(|i| {
+            let center = (i as f64 + 0.5) * scale;
+            let left = ((center - support + 0.5) as i64).max(0) as usize;
+            let right = (((center + support + 0.5) as i64).max(0) as usize).min(input);
+            let mut weights = Vec::new();
+            let mut sum = 0.0;
+            for p in left..right {
+                let x = (p as f64 - center + 0.5) * inverse;
+                let weight = match filter {
+                    Filter::Lanczos if (-3.0..3.0).contains(&x) => sinc(x) * sinc(x / 3.0),
+                    Filter::Bicubic => {
+                        let x = x.abs();
+                        if x < 1.0 {
+                            ((1.5 * x - 2.5) * x) * x + 1.0
+                        } else if x < 2.0 {
+                            (((-0.5 * x + 2.5) * x - 4.0) * x) + 2.0
+                        } else {
+                            0.0
+                        }
+                    }
+                    _ => 0.0,
+                };
+                weights.push(weight);
+                sum += weight;
+            }
+            if sum != 0.0 {
+                for w in &mut weights {
+                    *w /= sum;
+                }
+            }
+            (left, weights)
+        })
+        .collect()
+}
+
+pub(crate) fn thumbnail_gray16(
+    mut image: image::ImageBuffer<image::Luma<u16>, Vec<u16>>,
+) -> crate::Result<RgbaImage> {
+    let (oldw, oldh) = image.dimensions();
+    let (w, h) = dimensions(oldw, oldh, 512);
+    let fx = ((oldw as f64 / w as f64 / 2.0) as u32).max(1);
+    let fy = ((oldh as f64 / h as f64 / 2.0) as u32).max(1);
+    if fx > 1 || fy > 1 {
+        // Pillow 12.3 refuses integer pre-reduction for mode I;16.
+        return Err("image has wrong mode".into());
+    }
+    for (horizontal, output, extent) in [
+        (true, w, oldw as f64 / fx as f64),
+        (false, h, oldh as f64 / fy as f64),
+    ] {
+        let input = if horizontal {
+            image.width()
+        } else {
+            image.height()
+        };
+        if input == output && extent == f64::from(input) {
+            continue;
+        }
+        let kernels = coefficients_float(
+            input as usize,
+            output as usize,
+            extent as f32,
+            Filter::Bicubic,
+        );
+        let mut resized = image::ImageBuffer::new(
+            if horizontal { output } else { image.width() },
+            if horizontal { image.height() } else { output },
+        );
+        for (x, y, pixel) in resized.enumerate_pixels_mut() {
+            let (start, weights) = &kernels[if horizontal { x } else { y } as usize];
+            let mut value = 0.0;
+            for (offset, weight) in weights.iter().enumerate() {
+                let index = (start + offset) as u32;
+                value += f64::from(
+                    image.get_pixel(
+                        if horizontal { index } else { x },
+                        if horizontal { y } else { index },
+                    )[0],
+                ) * weight;
+            }
+            *pixel = image::Luma([value.round().clamp(0.0, 65535.0) as u16]);
+        }
+        image = resized;
+    }
+    Ok(RgbaImage::from_fn(w, h, |x, y| {
+        let value = image.get_pixel(x, y)[0].min(255) as u8;
+        image::Rgba([value, value, value, 255])
+    }))
+}
+fn pass(
+    image: &RgbaImage,
+    output: u32,
+    extent: f32,
+    horizontal: bool,
+    filter: Filter,
+) -> RgbaImage {
     let (input, other) = if horizontal {
         (image.width(), image.height())
     } else {
         (image.height(), image.width())
     };
-    let kernels = coefficients(input as usize, output as usize, extent);
+    let kernels = coefficients(input as usize, output as usize, extent, filter);
     let mut result = RgbaImage::new(
         if horizontal { output } else { other },
         if horizontal { other } else { output },
@@ -139,10 +244,44 @@ fn reduce(image: &RgbaImage, fx: u32, fy: u32) -> RgbaImage {
     }
     result
 }
-pub fn thumbnail(mut image: RgbaImage, alpha: bool, nearest: bool) -> RgbaImage {
+pub fn thumbnail(image: RgbaImage, alpha: bool, nearest: bool) -> RgbaImage {
+    thumbnail_sized(image, alpha, nearest, 128, Filter::Lanczos)
+}
+
+pub fn thumbnail_sized(
+    image: RgbaImage,
+    alpha: bool,
+    nearest: bool,
+    maximum: u32,
+    filter: Filter,
+) -> RgbaImage {
     let (oldw, oldh) = (image.width(), image.height());
-    let (w, h) = dimensions(oldw, oldh);
-    if (w, h) == (oldw, oldh) {
+    let (w, h) = dimensions(oldw, oldh, maximum);
+    thumbnail_region(
+        image,
+        if alpha {
+            Channels::Alpha
+        } else {
+            Channels::Opaque
+        },
+        nearest,
+        (w, h),
+        (oldw as f64, oldh as f64),
+        filter,
+    )
+}
+
+pub(crate) fn thumbnail_region(
+    mut image: RgbaImage,
+    channels: Channels,
+    nearest: bool,
+    (w, h): (u32, u32),
+    (extent_x, extent_y): (f64, f64),
+    filter: Filter,
+) -> RgbaImage {
+    let alpha = matches!(channels, Channels::Alpha);
+    let (oldw, oldh) = (image.width(), image.height());
+    if (w, h) == (oldw, oldh) && (extent_x, extent_y) == (oldw as f64, oldh as f64) {
         return image;
     }
     if nearest {
@@ -181,26 +320,26 @@ pub fn thumbnail(mut image: RgbaImage, alpha: bool, nearest: bool) -> RgbaImage 
         (1, 1)
     } else {
         (
-            ((oldw as f64 / w as f64 / 2.0) as u32).max(1),
-            ((oldh as f64 / h as f64 / 2.0) as u32).max(1),
+            ((extent_x / w as f64 / 2.0) as u32).max(1),
+            ((extent_y / h as f64 / 2.0) as u32).max(1),
         )
     };
-    let extent_x = (oldw as f64 / fx as f64) as f32;
-    let extent_y = (oldh as f64 / fy as f64) as f32;
+    let extent_x = (extent_x / fx as f64) as f32;
+    let extent_y = (extent_y / fy as f64) as f32;
     if fx > 1 || fy > 1 {
         image = reduce(&image, fx, fy);
     }
     if image.height() > image.width().saturating_mul(100) && h < image.height() {
-        image = pass(&image, h, extent_y, false);
+        image = pass(&image, h, extent_y, false, filter);
         if image.width() != w || extent_x != image.width() as f32 {
-            image = pass(&image, w, extent_x, true);
+            image = pass(&image, w, extent_x, true, filter);
         }
     } else {
         if image.width() != w || extent_x != image.width() as f32 {
-            image = pass(&image, w, extent_x, true);
+            image = pass(&image, w, extent_x, true, filter);
         }
         if image.height() != h || extent_y != image.height() as f32 {
-            image = pass(&image, h, extent_y, false);
+            image = pass(&image, h, extent_y, false, filter);
         }
     }
     if alpha {
@@ -212,7 +351,7 @@ pub fn thumbnail(mut image: RgbaImage, alpha: bool, nearest: bool) -> RgbaImage 
             }
         }
     }
-    if !alpha {
+    if matches!(channels, Channels::Opaque) {
         for p in image.pixels_mut() {
             p[3] = 255;
         }
