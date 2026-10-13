@@ -106,7 +106,7 @@ metadata field and includes its theme schema URL. Qt schemes use 21 ordered
 QPalette roles with **AARRGGBB** colors; qt6ct supplies Accent from Highlight when
 needed. fuzzel uses **RRGGBBAA** without `#`.
 
-The [template tests](tests/test_adoption_templates.py) render the public sample
+The [template tests](tests/templates/test_rendered_formats.py) render the public sample
 palettes in both modes, parse output, and compare native and Python exports.
 See [parser coverage and limitations](docs/template-validation.md). Syntax checks
 cannot prove how every installed app/version will draw the colors.

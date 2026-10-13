@@ -1,6 +1,6 @@
 # Template validation
 
-`tests/test_adoption_templates.py` renders every new template against the frozen
+`tests/templates/test_rendered_formats.py` renders every new template against the frozen
 public gallery's six Natural palettes and the default palette, each in dark and
 light mode: **14 palettes per template**. These are sample inputs, not regenerated
 engine golden data. The separate installed-package and native golden suites
@@ -19,12 +19,15 @@ Use the project's isolated Python development environment (Python 3.13+):
 ```sh
 python -m pip install . -r tests/template-parsers.txt
 nice -n 10 cargo build --release --locked -j2 -p orient-cli
-nice -n 10 python -m unittest discover -s tests -p test_adoption_templates.py -q
+nice -n 10 python -m unittest discover -s tests/templates -q
 ```
 
 The full suite requires fish and tmux for their application parser tests. Install
 them through your normal package manager before running the command above. CI installs both and the pinned Python test parsers.
-The parser packages are test-only; the binary has no runtime dependency on them.
+The format suite lives in `tests/templates` and runs explicitly in both engine
+and distribution CI. This keeps the original unit suite and offline Arch package
+checks usable without optional parser packages. The parser packages are
+test-only; the binary has no runtime dependency on them.
 A missing required parser fails the tests instead of silently skipping coverage.
 
 ## Coverage

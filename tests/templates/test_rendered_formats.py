@@ -25,7 +25,7 @@ import yaml
 from orient.engine import default_palette
 from orient.export import export, render
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES = ROOT / "src/orient/templates"
 BINARY = Path(os.environ.get("ORIENT_BINARY", ROOT / "target/release/orient")).resolve()
 TARGETS = {
