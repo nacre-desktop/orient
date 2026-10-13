@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Match Pillow thumbnail arithmetic, restoring exact native gallery palettes.
+  Add a fingerprinted JSON interface for native desktop consumers and safe
+  decoder subprocess cancellation.
+
 - Move deterministic engine calculations into Rust with abi3 Python bindings.
   Preserve Pillow decoding, Python API, palette colors and template output.
   Source builds now require Rust and maturin.

@@ -2,6 +2,7 @@
 //! Deterministic Orient calculations. Decoding, storage and publication are callers' responsibilities.
 
 pub mod accessibility;
+pub mod api;
 pub mod classic;
 pub mod colour;
 pub mod engine;

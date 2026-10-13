@@ -51,7 +51,8 @@ cargo build --release --locked -p orient-cli
 ```
 
 Its decoder supports PNG, JPEG, WebP, GIF, BMP and TIFF; FFmpeg enables video
-sampling. Rust decoding can produce different colors from Pillow. See the
+sampling. The gallery palettes match Pillow exactly; JPEG and some other decoding
+paths can still differ. See the
 [decoder measurements](tests/parity/decoder-report.json) and
 [architecture note](docs/development/architecture.md). Arch provides separate
 [`orient` and `python-orient-colors` packages](packaging/arch/).

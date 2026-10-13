@@ -25,13 +25,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg liblcms2-dev pkg-config
-          cargo build --release --locked -p orient-cli
+          cargo build --release --locked -p orient-cli --bins --example normalized_frames
           python -m pip install . "pillow==${{ matrix.pillow }}" ruff==0.16.10 build
       - name: Lint, test and build
         run: |
           ruff format --check .
           ruff check .
           python -m unittest discover -s tests
+          python tests/parity/check_native_golden.py -q
           python tests/parity/check_golden.py -q
           cargo fmt --check
           cargo clippy -- -D warnings

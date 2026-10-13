@@ -23,7 +23,7 @@ pub fn render(
             .filter(|p| Path::new(p).is_file())
         {
             if palette["name"] == "dynamic" {
-                if palette["engine"] != orient_core::ENGINE_ID {
+                if palette["engine"] != crate::engine_id() {
                     return fail("Palette engine changed; supply an explicit companion palette");
                 }
                 if storage::digest(Path::new(source))?
@@ -82,7 +82,13 @@ fn custom(root: &Path, folder: &Path, output: &mut Vec<(PathBuf, String)>) -> Re
     }
     Ok(())
 }
-pub fn export(palette: &Value, directory: &Path, templates: Option<&Path>) -> Result<Vec<String>> {
+pub fn export(
+    palette: &Value,
+    directory: &Path,
+    templates: Option<&Path>,
+    schemes: &Map<String, Value>,
+    variables: Option<&Map<String, Value>>,
+) -> Result<Vec<String>> {
     let mut inputs = Vec::new();
     if let Some(root) = templates {
         let root = root.canonicalize()?;
@@ -113,7 +119,7 @@ pub fn export(palette: &Value, directory: &Path, templates: Option<&Path>) -> Re
                 target.display()
             ));
         }
-        let text = render(&text, palette, &Map::new(), None)?;
+        let text = render(&text, palette, schemes, variables)?;
         if target.extension().is_some_and(|v| v == "json") {
             let _: Value = serde_json::from_str(&text)?;
         }

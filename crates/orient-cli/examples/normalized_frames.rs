@@ -1,4 +1,7 @@
-//! Developer-only decoder diagnostics, outside the installed CLI surface.
+pub static CANCELLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+#[path = "../src/resample.rs"]
+mod resample;
+// Developer-only decoder diagnostics, outside the installed CLI surface.
 #[path = "../src/decoder.rs"]
 mod decoder;
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;

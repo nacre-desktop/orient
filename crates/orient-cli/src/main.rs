@@ -1,5 +1,7 @@
 mod decoder;
 mod export;
+mod resample;
+mod rpc;
 mod storage;
 use clap::{ArgAction, Parser, Subcommand};
 use orient_core::{engine, extract, palette};
@@ -8,15 +10,30 @@ use std::{
     fs,
     path::{Path, PathBuf},
 };
+pub static CANCELLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+pub fn engine_id() -> &'static str {
+    static ID: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    ID.get_or_init(|| {
+        format!(
+            "{}-{}",
+            orient_core::ENGINE_ID,
+            &env!("ORIENT_DECODER_HASH")[..12]
+        )
+    })
+}
+pub fn build_info() -> Value {
+    json!({"backend":"rust", "interfaceVersion":1,"engine":engine_id(),"coreEngine":orient_core::ENGINE_ID,
+           "decoder":env!("ORIENT_DECODER_HASH"),"version":env!("CARGO_PKG_VERSION").replace("-dev.",".dev")})
+}
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 fn error(s: &str) -> Box<dyn std::error::Error + Send + Sync> {
-    std::io::Error::other(s).into()
+    orient_core::Error::Value(s.to_owned()).into()
 }
 fn fail<T>(s: &str) -> Result<T> {
     Err(error(s))
 }
 #[derive(Parser)]
-#[command(name="orient",version=orient_core::ENGINE_ID,args_override_self=true,disable_version_flag=true,about="Standalone, read-only Orient CLI. Publication belongs to the caller.")]
+#[command(name="orient",version=engine_id(),args_override_self=true,disable_version_flag=true,about="Standalone, read-only Orient CLI. Publication belongs to the caller.")]
 struct Args {
     #[arg(long="version", action=ArgAction::Version)]
     _version: Option<bool>,
@@ -103,11 +120,13 @@ pub fn from_image(path: &Path, options: &Value) -> Result<Value> {
     let path = resolve(path)?;
     let settings = engine::settings(options)?;
     let identity = storage::identity(&path, &settings)?;
-    let cache = storage::root()
-        .join("palettes")
-        .join(format!("rust-{identity}.json"));
+    let folder = options["cache_dir"]
+        .as_str()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| storage::root().join("palettes"));
+    let cache = folder.join(format!("rust-{identity}.json"));
     if let Ok(value) = storage::read(&cache) {
-        if value["engine"] == orient_core::ENGINE_ID
+        if value["engine"] == engine_id()
             && value["formatVersion"] == orient_core::FORMAT_VERSION
             && value["input"] == settings
             && value["name"] == "dynamic"
@@ -122,13 +141,15 @@ pub fn from_image(path: &Path, options: &Value) -> Result<Value> {
     let mut analysis = extract::analyze(&frames)?;
     analysis["path"] = json!(path);
     analysis["digest"] = json!(storage::digest(&path)?);
-    analysis["engine"] = json!(orient_core::ENGINE_ID);
+    analysis["engine"] = json!(engine_id());
     let classic = if settings["personality"] == "natural" {
         Some(orient_core::classic::analyze(&frames)?)
     } else {
         None
     };
-    let result = engine::from_analysis(analysis, classic.as_ref(), &settings, options.get("hour"))?;
+    let mut result =
+        engine::from_analysis(analysis, classic.as_ref(), &settings, options.get("hour"))?;
+    result["engine"] = json!(engine_id());
     if storage::identity(&path, &settings)? != identity {
         return fail("Wallpaper changed during extraction; select it again");
     }
@@ -198,7 +219,7 @@ fn run(args: Args) -> Result<()> {
             directory,
             templates,
         } => {
-            json!({"files":export::export(&storage::read(&palette)?,&directory,templates.as_deref())?})
+            json!({"files":export::export(&storage::read(&palette)?,&directory,templates.as_deref(),&serde_json::Map::new(),None)?})
         }
         Commands::Render {
             palette,
@@ -299,6 +320,15 @@ fn parse_args() -> Args {
 }
 
 fn main() {
+    if ctrlc::set_handler(|| CANCELLED.store(true, std::sync::atomic::Ordering::Relaxed)).is_err() {
+        eprintln!("orient: Cannot install cancellation handler");
+        std::process::exit(1);
+    }
+    let arguments: Vec<_> = std::env::args_os().collect();
+    if arguments.len() == 2 && arguments[1] == "--rpc" {
+        rpc::serve();
+        return;
+    }
     for arg in std::env::args().skip(1) {
         if [
             "analyze", "sample", "palette", "export", "render", "--help", "-h",
@@ -308,12 +338,16 @@ fn main() {
             break;
         }
         if arg.starts_with("--") && "--version".starts_with(&arg) && !"--help".starts_with(&arg) {
-            println!("{}", orient_core::ENGINE_ID);
+            println!("{}", engine_id());
             return;
         }
     }
     if let Err(e) = run(parse_args()) {
         eprintln!("orient: {e}");
-        std::process::exit(1)
+        std::process::exit(if CANCELLED.load(std::sync::atomic::Ordering::Relaxed) {
+            130
+        } else {
+            1
+        })
     }
 }

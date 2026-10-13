@@ -25,6 +25,7 @@ ruff format --check .
 ruff check .
 python -m unittest discover -s tests
 python tests/parity/check_golden.py -q
+python tests/parity/check_native_golden.py -q
 cargo fmt --check
 cargo clippy -- -D warnings
 cargo test
@@ -38,7 +39,7 @@ release URL/checksum continues to identify the published dev5 archive until
 the maintainer prepares a future release.
 
 The standalone CLI uses the `image` codecs, LCMS2 for ICC conversion, and a
-Lanczos3 thumbnail. GIF/video sampling uses four fixed temporal points. A
+Pillow-compatible integer reduction and Lanczos thumbnail. GIF/video sampling uses four fixed temporal points. A
 50-megapixel check precedes pixel allocation; high bit depth is refused. Video
 subprocesses run in separate process groups, killed/reaped after 10 s (probe)
 or 20 s (decode). Cache writes are atomic and 0600. Rust cache filenames include
@@ -49,11 +50,23 @@ LCMS2 is a native dependency. Arch `orient` supplies the command;
 `python-orient-colors` supplies the library and `python -m orient`.
 
 `tests/parity/decoder-report.json` records all roles across both modes and all
-personalities for each gallery image. Original PNG pixels decode identically;
-thumbnail differences cross the existing 0.045 accent-separation threshold in
-dark Harmony (`coast-day`) and Mist (`warm-room`). Their largest differences are
-0.078494 and 0.214539 OKLab respectively. This is why Python retains Pillow.
-No core thresholds or comparison tolerances changed.
+personalities for each gallery image. the seven gallery wallpapers now match Pillow exactly for all 112 combinations
+of mode and personality, including the formerly divergent accent choices.
+Pixel tests cover RGB, RGBA, grayscale, grayscale-alpha and indexed PNG modes, BMP/TIFF/WebP and animated GIF mode promotion,
+integer reduction, narrow images and rounding boundaries. The resize arithmetic
+was independently implemented from Pillow's documented/source behavior; no
+Pillow code is linked into the binary. JPEG draft decoding, ICC conversion and
+additional animation formats can still differ. No core thresholds or comparison
+tolerances changed.
+
+Local consumers can send one JSON request to `orient --rpc` on stdin:
+`{"operation":"info","payload":{}}`. Responses carry `interfaceVersion`,
+`engine` and either `result` or an `error` with `kind` and `message`. The interface
+exposes the full engine options and pure core operations, including raw template
+rendering. Core dispatch is shared with PyO3. Consumers must verify the interface
+version and fingerprint. Native identity includes both core and decoder source
+hashes; Python identity includes the core hash only. SIGINT/SIGTERM cancellation
+also kills and reaps active ffmpeg/ffprobe process groups.
 
 Pillow plugin IDs outside the binary's six-format set (availability depends on
 Pillow's build and optional tools): AVIF, BLP, BUFR, CUR, DCX, DDS, DIB, EPS,
@@ -61,7 +74,7 @@ FITS, FLI, FTEX, GBR, GRIB, HDF5, ICNS, ICO, IM, IMT, IPTC, JPEG2000, MCIDAS,
 MPEG, MSP, PCD, PCX, PIXAR, PPM, PSD, QOI, SGI, SPIDER, SUN, TGA, WMF, XBM,
 XPM and XVTHUMB. MPEG video can still use the documented ffmpeg-supported
 extensions. Animated WebP/APNG and multipage TIFF currently use their first
-frame; CMYK/LAB ICC profiles are unsupported at the RGB decoder boundary.
+frame; palette TIFF and CMYK/LAB ICC profiles are unsupported at the RGB decoder boundary.
 
 Reproduce decoding/performance measurements after building the release binary:
 
@@ -74,3 +87,7 @@ python tests/parity/benchmark_cli.py target/release/orient /path/to/original/src
 
 The CLI benchmark measures fresh-cache wall time including process startup. Its
 small native RSS helper avoids counting inherited Python harness pages.
+
+The native cancellation adapter uses `ctrlc` (MIT/Apache-2.0), `nix` (MIT),
+`dispatch2` (Zlib/Apache-2.0/MIT) and `objc2` (MIT); the latter two are
+target-specific dependencies. `gif` (MIT/Apache-2.0) supplies frame metadata.

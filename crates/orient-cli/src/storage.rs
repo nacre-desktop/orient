@@ -52,7 +52,7 @@ pub fn identity(path: &Path, settings: &Value) -> Result<String> {
         meta.ctime(),
         meta.ctime_nsec(),
         settings,
-        orient_core::ENGINE_ID,
+        crate::engine_id(),
         env!("ORIENT_DECODER_HASH")
     ]);
     Ok(format!(

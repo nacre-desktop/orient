@@ -1,5 +1,5 @@
 use crate::{fail, Result};
-use image::{imageops::FilterType, AnimationDecoder, DynamicImage, ImageDecoder, ImageReader};
+use image::{AnimationDecoder, DynamicImage, ImageDecoder, ImageReader};
 use nix::{
     sys::signal::{killpg, Signal},
     unistd::Pid,
@@ -9,7 +9,7 @@ use serde_json::Value;
 use std::os::unix::process::CommandExt;
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::{BufReader, Read, Seek, SeekFrom},
     path::Path,
     process::{Command, Stdio},
     thread,
@@ -23,15 +23,10 @@ fn check(width: u32, height: u32) -> Result<()> {
         Ok(())
     }
 }
-fn normalize(mut image: DynamicImage, profile: Option<&[u8]>) -> Result<Frame> {
+fn normalize(image: DynamicImage, profile: Option<&[u8]>, nearest: bool) -> Result<Frame> {
     check(image.width(), image.height())?;
-    if image.width() > 128 || image.height() > 128 {
-        let ratio = (128.0 / image.width() as f64).min(128.0 / image.height() as f64);
-        let width = (image.width() as f64 * ratio).round_ties_even().max(1.0) as u32;
-        let height = (image.height() as f64 * ratio).round_ties_even().max(1.0) as u32;
-        image = image.resize_exact(width, height, FilterType::Lanczos3);
-    }
-    let mut rgba = image.to_rgba8();
+    let alpha = image.color().has_alpha();
+    let mut rgba = crate::resample::thumbnail(image.to_rgba8(), alpha, nearest);
     if let Some(profile) = profile {
         let convert = || -> std::result::Result<Vec<[u8; 3]>, lcms2::Error> {
             let input = lcms2::Profile::new_icc(profile)?;
@@ -62,10 +57,49 @@ fn normalize(mut image: DynamicImage, profile: Option<&[u8]>) -> Result<Frame> {
         rgba: rgba.into_raw(),
     })
 }
+fn nearest_mode(path: &Path, format: Option<image::ImageFormat>) -> Result<bool> {
+    let mut header = [0u8; 64];
+    let mut file = File::open(path)?;
+    let count = file.read(&mut header)?;
+    Ok(match format {
+        Some(image::ImageFormat::Png) if count >= 26 => {
+            header[25] == 3 || (header[25] == 0 && header[24] == 1)
+        }
+        Some(image::ImageFormat::Gif) => true,
+        Some(image::ImageFormat::Bmp) if count >= 30 => {
+            let size = u32::from_le_bytes(header[14..18].try_into().unwrap());
+            let bits = if size == 12 {
+                u16::from_le_bytes(header[24..26].try_into().unwrap())
+            } else {
+                u16::from_le_bytes(header[28..30].try_into().unwrap())
+            };
+            if bits == 8 {
+                let stride = if size == 12 { 3 } else { 4 };
+                let used = if size >= 40 {
+                    u32::from_le_bytes(header[46..50].try_into().unwrap())
+                } else {
+                    0
+                };
+                let colors = if used == 0 { 256 } else { used.min(256) };
+                let mut palette = vec![0; colors as usize * stride];
+                file.seek(SeekFrom::Start(14 + u64::from(size)))?;
+                file.read_exact(&mut palette)?;
+                !palette
+                    .chunks_exact(stride)
+                    .enumerate()
+                    .all(|(i, p)| p[0] == i as u8 && p[1] == i as u8 && p[2] == i as u8)
+            } else {
+                bits == 1 || bits == 4
+            }
+        }
+        _ => false,
+    })
+}
 pub fn still(path: &Path) -> Result<Frame> {
-    let mut decoder = ImageReader::open(path)?
-        .with_guessed_format()?
-        .into_decoder()?;
+    let reader = ImageReader::open(path)?.with_guessed_format()?;
+    let format = reader.format();
+    let nearest = nearest_mode(path, format)?;
+    let mut decoder = reader.into_decoder()?;
     let (width, height) = decoder.dimensions();
     check(width, height)?;
     let ty = decoder.color_type();
@@ -76,12 +110,26 @@ pub fn still(path: &Path) -> Result<Frame> {
     let orientation = decoder.orientation()?;
     let mut image = DynamicImage::from_decoder(decoder)?;
     image.apply_orientation(orientation);
-    normalize(image, profile.as_deref())
+    normalize(image, profile.as_deref(), nearest)
 }
 fn gif(path: &Path) -> Result<Vec<Frame>> {
     let decoder = image::codecs::gif::GifDecoder::new(BufReader::new(File::open(path)?))?;
     let (width, height) = decoder.dimensions();
     check(width, height)?;
+    // Pillow promotes later palette frames to RGB, or RGBA when the first
+    // frame declares transparency. That distinction controls integer reduction.
+    let mut metadata = gif::DecodeOptions::new().read_info(BufReader::new(File::open(path)?))?;
+    let first = metadata.next_frame_info()?.cloned();
+    let transparent = first.as_ref().and_then(|frame| frame.transparent);
+    let alpha = transparent.is_some();
+    let palette = first
+        .as_ref()
+        .and_then(|frame| frame.palette.as_deref())
+        .or_else(|| metadata.global_palette());
+    let hidden = transparent.and_then(|index| {
+        let offset = usize::from(index) * 3;
+        palette.and_then(|colors| colors.get(offset..offset + 3))
+    });
     let count = decoder
         .into_frames()
         .try_fold(0_usize, |count, frame| -> Result<usize> {
@@ -105,10 +153,20 @@ fn gif(path: &Path) -> Result<Vec<Frame>> {
     for (index, frame) in decoder.into_frames().enumerate() {
         let frame = frame?;
         if indexes.contains(&index) {
-            result.push(normalize(
-                DynamicImage::ImageRgba8(frame.into_buffer()),
-                None,
-            )?);
+            let mut image = DynamicImage::ImageRgba8(frame.into_buffer());
+            if index == 0 {
+                if let Some(hidden) = hidden {
+                    for pixel in image.as_mut_rgba8().unwrap().pixels_mut() {
+                        if pixel[3] == 0 {
+                            pixel.0[..3].copy_from_slice(hidden);
+                        }
+                    }
+                }
+            }
+            if index != 0 && !alpha {
+                image = DynamicImage::ImageRgb8(image.into_rgb8());
+            }
+            result.push(normalize(image, None, index == 0)?);
         }
     }
     Ok(result)
@@ -153,6 +211,11 @@ pub fn subprocess(command: &mut Command, timeout: Duration) -> Result<Vec<u8>> {
             if output.is_finished() && errors.is_finished() {
                 break Ok(status);
             }
+        }
+        if crate::CANCELLED.load(std::sync::atomic::Ordering::Relaxed) {
+            let _ = killpg(Pid::from_raw(child.id() as i32), Signal::SIGKILL);
+            let _ = child.wait();
+            break Err(crate::error("Animation decoder cancelled"));
         }
         if started.elapsed() >= timeout {
             let _ = killpg(Pid::from_raw(child.id() as i32), Signal::SIGKILL);

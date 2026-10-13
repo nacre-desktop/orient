@@ -113,10 +113,10 @@ class RustCliTests(unittest.TestCase):
             self.assertEqual(json.loads(result.stdout)["sample"]["frames"], 4)
 
     def test_flags_exit_codes_cache_render_export(self):
-        self.assertEqual(self.run_cli("--version").stdout.strip(), ENGINE_ID)
+        self.assertTrue(self.run_cli("--version").stdout.strip().startswith(ENGINE_ID + "-"))
         self.assertEqual(self.run_cli().returncode, 2)
         self.assertEqual(self.run_cli("-V").returncode, 2)
-        self.assertEqual(self.run_cli("--vers").stdout.strip(), ENGINE_ID)
+        self.assertEqual(self.run_cli("--vers").stdout, self.run_cli("--version").stdout)
         self.assertEqual(self.run_cli("palette", self.image(), "--hour", "9999999999999999999999").returncode, 1)
         self.assertEqual(self.run_cli("palette", self.image(), "--mode", "wrong").returncode, 2)
         self.assertEqual(self.run_cli("sample", self.image(), "-0.1", "0.5").returncode, 1)
