@@ -8,6 +8,9 @@ pkgdesc='Wallpaper colors, readable palettes and portable theme templates'
 arch=('x86_64' 'aarch64')
 url='https://github.com/nacre-desktop/orient'
 license=('MIT')
+# GCC LTO archives cannot be consumed by Rust's LLVM linker. Cargo retains its
+# own release optimization; only makepkg's cross-language LTO flags are disabled.
+options=('!lto')
 depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
 makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git' 'cmake')
 checkdepends=('ffmpeg')
