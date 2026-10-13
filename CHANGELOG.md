@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.1.0-dev.6 (unreleased)
+## Unreleased — 0.1.0-dev.6
+
+- Add themes for Ghostty, WezTerm, niri, Waybar, mako, SwayNC, fuzzel, Helix,
+  Zed, Starship, tmux, fish, Zathura, qt5ct/qt6ct, Hyprlock, Dunst, Yazi,
+  Lazygit and Cava. Validate dark/light sample renders with format parsers and
+  compare standalone/Python exports; document unavailable application parsers.
+- Add a standalone installation and template adoption guide, Matugen migration
+  notes, and worked niri/Waybar and Hyprland examples. Palette colors and the
+  development version are unchanged.
 
 - Add persistent JSON-lines RPC with request IDs for desktop helper processes.
 
