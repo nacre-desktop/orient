@@ -62,3 +62,17 @@ from an unchanged dynamic image source with a matching engine; otherwise supply
 it explicitly. Rendering may therefore read/cache that companion palette.
 Missing roles or invalid templates/palettes can raise `KeyError`/`ValueError`.
 Arbitrary scripting and includes are unsupported.
+
+## Rust image previews
+
+`orient_decoder::rgb_preview_png(path, (maximum_width, maximum_height), blur_radius)`
+returns RGB PNG bytes without publishing files or desktop settings. It applies
+EXIF orientation, converts to RGB, makes a non-upscaling Pillow-compatible
+bicubic thumbnail and optionally applies Pillow's three-pass Gaussian blur.
+PNG ICC and transparency metadata are retained. Bounds must be nonzero and the
+blur radius finite within 0–1000; the decoder's 50-megapixel limit applies.
+
+This complements `artwork_png`, whose existing raw-orientation 512px contract
+stays unchanged. The preview's sampling, blur rounding and PNG encoding match
+frozen Pillow 12.3.0 vectors, including exact encoded bytes. The Pillow-derived
+arithmetic retains the MIT-CMU notice in `crates/orient-decoder/LICENSE-Pillow`.

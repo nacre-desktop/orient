@@ -4,6 +4,8 @@
 mod artwork;
 mod decoder;
 mod jpeg;
+mod preview;
+pub use preview::rgb_preview_png;
 mod resample;
 pub use artwork::artwork_png;
 pub use decoder::{frames, is_video, still, subprocess, MAX_PIXELS};

@@ -7,7 +7,7 @@ use crate::{
 use image::{DynamicImage, ImageDecoder, ImageFormat, ImageReader};
 use std::{fs, path::Path};
 
-fn chunk(output: &mut Vec<u8>, kind: &[u8; 4], payload: &[u8]) {
+pub(crate) fn chunk(output: &mut Vec<u8>, kind: &[u8; 4], payload: &[u8]) {
     output.extend_from_slice(&(payload.len() as u32).to_be_bytes());
     output.extend_from_slice(kind);
     output.extend_from_slice(payload);
@@ -16,7 +16,7 @@ fn chunk(output: &mut Vec<u8>, kind: &[u8; 4], payload: &[u8]) {
     crc.update(payload);
     output.extend_from_slice(&crc.finalize().to_be_bytes());
 }
-fn compress(input: &[u8], row_bytes: Option<usize>) -> Result<Vec<u8>> {
+pub(crate) fn compress(input: &[u8], row_bytes: Option<usize>) -> Result<Vec<u8>> {
     let config = zlib_rs::DeflateConfig {
         level: 6,
         mem_level: if row_bytes.is_some() { 9 } else { 8 },
@@ -83,7 +83,7 @@ fn score(row: &[u8]) -> u64 {
         .map(|&value| u64::from(value.min(value.wrapping_neg())))
         .sum()
 }
-fn filtered(rgb: &[u8], width: usize) -> Vec<u8> {
+pub(crate) fn filtered(rgb: &[u8], width: usize) -> Vec<u8> {
     let stride = width * 3;
     let mut previous = vec![0; stride];
     let mut output = Vec::with_capacity(rgb.len() + rgb.len() / stride);
@@ -137,7 +137,7 @@ fn filtered(rgb: &[u8], width: usize) -> Vec<u8> {
     }
     output
 }
-fn png_transparency(bytes: &[u8]) -> Option<Vec<u8>> {
+pub(crate) fn png_transparency(bytes: &[u8]) -> Option<Vec<u8>> {
     let color = *bytes.get(25)?;
     let depth = *bytes.get(24)?;
     let mut palette = None;
