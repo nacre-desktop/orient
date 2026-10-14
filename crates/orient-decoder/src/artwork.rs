@@ -17,8 +17,15 @@ pub(crate) fn chunk(output: &mut Vec<u8>, kind: &[u8; 4], payload: &[u8]) {
     output.extend_from_slice(&crc.finalize().to_be_bytes());
 }
 pub(crate) fn compress(input: &[u8], row_bytes: Option<usize>) -> Result<Vec<u8>> {
+    compress_level(input, row_bytes, 6)
+}
+pub(crate) fn compress_level(
+    input: &[u8],
+    row_bytes: Option<usize>,
+    level: i32,
+) -> Result<Vec<u8>> {
     let config = zlib_rs::DeflateConfig {
-        level: 6,
+        level,
         mem_level: if row_bytes.is_some() { 9 } else { 8 },
         strategy: if row_bytes.is_some() {
             zlib_rs::Strategy::Filtered
@@ -84,7 +91,10 @@ fn score(row: &[u8]) -> u64 {
         .sum()
 }
 pub(crate) fn filtered(rgb: &[u8], width: usize) -> Vec<u8> {
-    let stride = width * 3;
+    filtered_channels(rgb, width, 3)
+}
+pub(crate) fn filtered_channels(rgb: &[u8], width: usize, channels: usize) -> Vec<u8> {
+    let stride = width * channels;
     let mut previous = vec![0; stride];
     let mut output = Vec::with_capacity(rgb.len() + rgb.len() / stride);
     for row in rgb.chunks_exact(stride) {
@@ -99,9 +109,13 @@ pub(crate) fn filtered(rgb: &[u8], width: usize) -> Vec<u8> {
                 .iter()
                 .enumerate()
                 .map(|(i, &value)| {
-                    let left = if i >= 3 { row[i - 3] } else { 0 };
+                    let left = if i >= channels { row[i - channels] } else { 0 };
                     let up = previous[i];
-                    let corner = if i >= 3 { previous[i - 3] } else { 0 };
+                    let corner = if i >= channels {
+                        previous[i - channels]
+                    } else {
+                        0
+                    };
                     let predictor = match filter {
                         2 => up,
                         1 => left,

@@ -112,7 +112,7 @@ fn box_pass(image: &RgbaImage, float_radius: f32) -> RgbaImage {
     }
     output
 }
-fn blur(mut image: RgbaImage, radius: f32) -> RgbaImage {
+pub(crate) fn blur(mut image: RgbaImage, radius: f32) -> RgbaImage {
     if radius == 0.0 {
         return image;
     }

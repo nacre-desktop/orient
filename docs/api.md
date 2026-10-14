@@ -76,3 +76,12 @@ This complements `artwork_png`, whose existing raw-orientation 512px contract
 stays unchanged. The preview's sampling, blur rounding and PNG encoding match
 frozen Pillow 12.3.0 vectors, including exact encoded bytes. The Pillow-derived
 arithmetic retains the MIT-CMU notice in `crates/orient-decoder/LICENSE-Pillow`.
+
+Generated RGBA artwork can use `encode_rgba_png(&image, compression_level)`,
+`resize_rgba(&image, (width, height), Filter::Lanczos)` (or `Filter::Bicubic`),
+and `blur_rgba(&image, radius)`. These operations preserve Pillow's encoded PNG
+bytes, premultiplied-alpha resize rounding and four-channel blur arithmetic.
+They accept `image::RgbaImage` buffers, write no files and have no desktop
+dependencies. Bounds are nonzero and at most 50 megapixels, compression is 0–9,
+and blur radius is finite within 0–1000. Resizing does not perform thumbnail
+pre-reduction. Existing image decoding and RGB preview contracts are unchanged.
