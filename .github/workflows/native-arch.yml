@@ -42,6 +42,9 @@ jobs:
             namcap orient-[0-9]*.pkg.tar.zst python-orient-colors-[0-9]*.pkg.tar.zst > namcap.log 2>&1
             bsdtar -xOf orient-[0-9]*.pkg.tar.zst .PKGINFO > package-info
           '
+          # The builder UID differs from the GitHub runner UID. Return only the
+          # artifact directory itself so the host can write proof logs/receipts.
+          docker exec "$container" chown "$(id -u):$(id -g)" /work
           # Native consumers need neither Python nor the developer toolchain.
           runtime=$(docker run --detach -v "$work:/work:ro" archlinux:base sleep infinity)
           trap 'docker rm --force "$container" "$runtime"' EXIT
@@ -112,7 +115,9 @@ jobs:
             gpg --batch --local-user "$fingerprint" --detach-sign "$archive"
             gpg --batch --verify "$archive.sig" "$archive"
           done
-          gpg --batch --local-user "$fingerprint" --detach-sign SHA256SUMS
+          for metadata in SHA256SUMS release.json PKGBUILD; do
+            gpg --batch --local-user "$fingerprint" --detach-sign "$metadata"
+          done
           version=$(python -c 'import json; print(json.load(open("release.json"))["version"])')
           revision=$(python -c 'import json; print(json.load(open("release.json"))["sourceRevision"])')
           tag="arch-$version"
