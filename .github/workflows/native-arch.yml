@@ -1,0 +1,127 @@
+name: Native Arch release
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the tested native Arch packages as an immutable prerelease
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: orient-native-arch
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Build the pinned native recipe with all checks
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/orient-arch"
+          mkdir -p "$work"
+          cp packaging/arch/PKGBUILD "$work/"
+          cp tests/orient-gallery/images/coast-day.png "$work/fixture.png"
+          git rev-parse HEAD > "$work/recipe-revision"
+          container=$(docker run --detach --privileged --cgroupns=host --tmpfs /run --tmpfs /tmp \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v "$work:/work" \
+            archlinux:base-devel /usr/lib/systemd/systemd)
+          trap 'docker rm --force "$container"' EXIT
+          docker exec "$container" bash -euxo pipefail -c '
+            pacman-key --init
+            pacman-key --populate archlinux
+            pacman -Syu --noconfirm devtools sudo namcap
+            useradd -m builder
+            printf "builder ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/builder
+            printf "\nMAKEFLAGS=-j2\nexport CARGO_BUILD_JOBS=2\n" >> /etc/makepkg.conf
+            chown -R builder:builder /work
+            cd /work
+            sudo -u builder extra-x86_64-build 2>&1 | tee build.log
+            namcap orient-[0-9]*.pkg.tar.zst python-orient-colors-[0-9]*.pkg.tar.zst > namcap.log 2>&1
+            bsdtar -xOf orient-[0-9]*.pkg.tar.zst .PKGINFO > package-info
+          '
+          # Native consumers need neither Python nor the developer toolchain.
+          runtime=$(docker run --detach -v "$work:/work:ro" archlinux:base sleep infinity)
+          trap 'docker rm --force "$container" "$runtime"' EXIT
+          docker exec "$runtime" bash -euxo pipefail -c '
+            pacman-key --init
+            pacman-key --populate archlinux
+            pacman -Syu --noconfirm
+            pacman -U --noconfirm /work/orient-[0-9]*.pkg.tar.zst
+            ! command -v python
+            ! command -v gcc
+            orient --version
+            orient palette /work/fixture.png > /tmp/palette.json
+          ' 2>&1 | tee "$work/runtime.log"
+          docker cp "$runtime:/tmp/palette.json" "$work/palette.json"
+          python - <<'PY'
+          import json, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'orient-arch'
+          palette = json.loads((root / 'palette.json').read_text())
+          assert isinstance(palette, dict) and palette, palette
+          info = dict(line.split(' = ', 1) for line in (root / 'package-info').read_text().splitlines() if ' = ' in line)
+          source = re.search(r'^_revision=([0-9a-f]{40})$', (root / 'PKGBUILD').read_text(), re.M).group(1)
+          (root / 'release.json').write_text(json.dumps(dict(package='orient', version=info['pkgver'], sourceRevision=source, recipeRevision=(root/'recipe-revision').read_text().strip(), runtime='native-without-python'), indent=2)+'\n')
+          PY
+          cd "$work"
+          sha256sum ./*.pkg.tar.zst > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: native-arch-packages
+          path: |
+            ${{ runner.temp }}/orient-arch/*.pkg.tar.zst
+            ${{ runner.temp }}/orient-arch/*.log
+            ${{ runner.temp }}/orient-arch/PKGBUILD
+            ${{ runner.temp }}/orient-arch/release.json
+            ${{ runner.temp }}/orient-arch/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
+  publish:
+    if: inputs.publish && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: native-arch-packages
+          path: dist
+      - name: Sign and publish the tested native packages
+        env:
+          ARCH_REPO_SIGNING_KEY: ${{ secrets.ARCH_REPO_SIGNING_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          umask 077
+          export GNUPGHOME
+          GNUPGHOME=$(mktemp -d)
+          trap 'gpgconf --kill gpg-agent; rm -rf "$GNUPGHOME"' EXIT
+          test -n "$ARCH_REPO_SIGNING_KEY"
+          printf '%s' "$ARCH_REPO_SIGNING_KEY" | gpg --batch --import
+          fingerprint=$(cat packaging/keys/nacre-repo.fingerprint)
+          gpg --batch --with-colons --list-secret-keys "$fingerprint" | grep -F "fpr:::::::::$fingerprint:"
+          cd dist
+          sha256sum --check SHA256SUMS
+          for archive in ./*.pkg.tar.zst; do
+            gpg --batch --local-user "$fingerprint" --detach-sign "$archive"
+            gpg --batch --verify "$archive.sig" "$archive"
+          done
+          gpg --batch --local-user "$fingerprint" --detach-sign SHA256SUMS
+          version=$(python -c 'import json; print(json.load(open("release.json"))["version"])')
+          revision=$(python -c 'import json; print(json.load(open("release.json"))["sourceRevision"])')
+          tag="arch-$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo 'Release already exists; refusing to replace immutable archives. Download that release instead.' >&2
+            exit 1
+          fi
+          cp ../packaging/keys/nacre-repo.asc .
+          gh release create "$tag" --target "$revision" --prerelease --latest=false \
+            --title "Orient native Arch $version" \
+            --notes 'Standalone native Orient package, built and tested in clean stock Arch; includes signatures, source/recipe receipt and checksums. Nacre installs Orient as a separate dependency. This release does not publish or change PyPI packages.' \
+            ./*.pkg.tar.zst ./*.sig SHA256SUMS release.json PKGBUILD nacre-repo.asc
