@@ -1,7 +1,7 @@
 # Frozen decoder reference
 
 These public, synthetic inputs were generated and normalized by the unchanged
-Python implementation at `d7a12ee`, with Pillow 12.3.0, before implementing the
+Python implementation at `f63ee73`, with Pillow 12.3.0, before implementing the
 Rust thumbnail path. `manifest.json` records dimensions and SHA-256 of each
 expected RGBA pixel buffer. Expected PNGs are byte-exact pixel references;
 compressed PNG file bytes are not the comparison boundary.

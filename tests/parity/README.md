@@ -1,6 +1,6 @@
 # Frozen Python parity reference
 
-Generated before porting from `c55b9bf`, Python 3.14 and Pillow 12.3.0, with
+Generated before porting from `f910148`, Python 3.14 and Pillow 12.3.0, with
 seed 8675309. `golden/manifest.json` summarizes coverage. The lossless PNG files
 are the exact normalized RGBA frames, including all four GIF samples. The
 compressed JSON contains complete outputs, not hashes or selected color roles.

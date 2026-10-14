@@ -1,5 +1,5 @@
 {
-  "reference": "Orient d7a12ee; Pillow 12.3.0; current Python normalize/frames; frozen before Rust changes",
+  "reference": "Orient f63ee73; Pillow 12.3.0; current Python normalize/frames; frozen before Rust changes",
   "cases": [
     {
       "input": "1-1031x777.png",

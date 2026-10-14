@@ -6,7 +6,7 @@ pkgbase = orient
 	arch = x86_64
 	arch = aarch64
 	license = MIT
-	options = !lto
+	checkdepends = ffmpeg
 	makedepends = python-build
 	makedepends = python-installer
 	makedepends = rust
@@ -14,24 +14,27 @@ pkgbase = orient
 	makedepends = lcms2
 	makedepends = git
 	makedepends = cmake
-	checkdepends = ffmpeg
-	optdepends = ffmpeg: video frame sampling
-	source = orient::git+https://github.com/nacre-desktop/orient.git#commit=9e1258d9e9d0e8b0a97b03943225c2ad9ded1e6d
-	sha256sums = SKIP
-
-pkgname = python-orient-colors
 	depends = python>=3.13
 	depends = python-pillow>=11
 	depends = python-pillow<13
+	optdepends = ffmpeg: video frame sampling
+	options = !lto
+	source = orient::git+https://github.com/nacre-desktop/orient.git#commit=17bf36efc7f6e85c2ded2ce4b7bd4cda4ea659b5
+	sha256sums = SKIP
 
 pkgname = orient
 	pkgdesc = Standalone wallpaper color engine and theme templates
-	depends = lcms2
-	depends = glibc
-	depends = gcc-libs
 	license = MIT
 	license = MIT-CMU
 	license = BSD-3-Clause
 	license = IJG
 	license = Zlib
+	depends = lcms2
+	depends = glibc
+	depends = gcc-libs
 	optdepends = ffmpeg: video frame sampling
+
+pkgname = python-orient-colors
+	depends = python>=3.13
+	depends = python-pillow>=11
+	depends = python-pillow<13
