@@ -54,3 +54,78 @@ pub fn blur_rgba(image: &RgbaImage, radius: f32) -> Result<RgbaImage> {
     }
     Ok(preview::blur(image.clone(), radius))
 }
+
+/// Resize a fractional source rectangle without rounding it to whole pixels.
+/// This is the bounded crop/resample operation used by Pillow's ImageOps.fit.
+pub fn resize_rgba_region(
+    image: &RgbaImage,
+    size: (u32, u32),
+    region: (f64, f64, f64, f64),
+    filter: Filter,
+) -> Result<RgbaImage> {
+    bounds(image.width(), image.height())?;
+    bounds(size.0, size.1)?;
+    let (left, top, right, bottom) = region;
+    if ![left, top, right, bottom].iter().all(|v| v.is_finite())
+        || left < 0.0
+        || top < 0.0
+        || right > f64::from(image.width())
+        || bottom > f64::from(image.height())
+        || left >= right
+        || top >= bottom
+    {
+        return Err("Invalid RGBA source rectangle".into());
+    }
+    Ok(resample::alpha_region(
+        image,
+        size,
+        (left as f32, top as f32, right as f32, bottom as f32),
+        filter,
+    ))
+}
+
+/// Decode the first image at full resolution into Pillow-compatible RGBA pixels.
+/// Keeps raw EXIF orientation and performs no color-profile transform, matching
+/// Image.open(path).convert("RGBA"). The shared 50-megapixel bound applies.
+pub fn load_rgba(path: &std::path::Path) -> Result<RgbaImage> {
+    use image::{DynamicImage, ImageDecoder, ImageFormat, ImageReader, Rgba};
+    let reader = ImageReader::open(path)?.with_guessed_format()?;
+    let format = reader.format();
+    let decoder = reader.into_decoder()?;
+    let (width, height) = decoder.dimensions();
+    bounds(width, height)?;
+    let (mut image, cmyk) = preview::decode_source(path, format, decoder)?;
+    if format == Some(ImageFormat::Gif) {
+        preview::restore_gif(&mut image, &std::fs::read(path)?)?;
+    }
+    if cmyk {
+        return Ok(preview::opaque(image, true));
+    }
+    Ok(match image {
+        DynamicImage::ImageLuma16(image) => RgbaImage::from_fn(width, height, |x, y| {
+            let value = image[(x, y)][0].min(255) as u8;
+            Rgba([value, value, value, 255])
+        }),
+        DynamicImage::ImageLumaA16(image) => RgbaImage::from_fn(width, height, |x, y| {
+            let p = image[(x, y)];
+            let value = (p[0] >> 8) as u8;
+            Rgba([value, value, value, (p[1] >> 8) as u8])
+        }),
+        DynamicImage::ImageRgb16(image) => RgbaImage::from_fn(width, height, |x, y| {
+            let p = image[(x, y)];
+            Rgba([(p[0] >> 8) as u8, (p[1] >> 8) as u8, (p[2] >> 8) as u8, 255])
+        }),
+        DynamicImage::ImageRgba16(image) => RgbaImage::from_fn(width, height, |x, y| {
+            Rgba(image[(x, y)].0.map(|value| (value >> 8) as u8))
+        }),
+        image => image.to_rgba8(),
+    })
+}
+
+/// Non-upscaling RGBA thumbnail with Pillow's aspect-ratio rounding.
+pub fn thumbnail_rgba(image: &RgbaImage, maximum: (u32, u32), filter: Filter) -> Result<RgbaImage> {
+    bounds(image.width(), image.height())?;
+    bounds(maximum.0, maximum.1)?;
+    let size = preview::dimensions(image.width(), image.height(), maximum);
+    resize_rgba(image, size, filter)
+}

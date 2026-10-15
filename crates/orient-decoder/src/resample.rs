@@ -57,9 +57,10 @@ fn coefficients(
     input: usize,
     output: usize,
     extent: f32,
+    origin: f32,
     filter: Filter,
 ) -> Vec<(usize, Vec<i64>)> {
-    coefficients_float(input, output, extent, filter)
+    coefficients_float_region(input, output, extent, origin, filter)
         .into_iter()
         .map(|(left, weights)| {
             (
@@ -79,6 +80,15 @@ fn coefficients_float(
     extent: f32,
     filter: Filter,
 ) -> Vec<(usize, Vec<f64>)> {
+    coefficients_float_region(input, output, extent, 0.0, filter)
+}
+fn coefficients_float_region(
+    input: usize,
+    output: usize,
+    extent: f32,
+    origin: f32,
+    filter: Filter,
+) -> Vec<(usize, Vec<f64>)> {
     let scale = extent as f64 / output as f64;
     let stretch = scale.max(1.0);
     let radius = match filter {
@@ -89,7 +99,7 @@ fn coefficients_float(
     let inverse = 1.0 / stretch;
     (0..output)
         .map(|i| {
-            let center = (i as f64 + 0.5) * scale;
+            let center = f64::from(origin) + (i as f64 + 0.5) * scale;
             let left = ((center - support + 0.5) as i64).max(0) as usize;
             let right = (((center + support + 0.5) as i64).max(0) as usize).min(input);
             let mut weights = Vec::new();
@@ -184,12 +194,22 @@ fn pass(
     horizontal: bool,
     filter: Filter,
 ) -> RgbaImage {
+    pass_region(image, output, extent, 0.0, horizontal, filter)
+}
+fn pass_region(
+    image: &RgbaImage,
+    output: u32,
+    extent: f32,
+    origin: f32,
+    horizontal: bool,
+    filter: Filter,
+) -> RgbaImage {
     let (input, other) = if horizontal {
         (image.width(), image.height())
     } else {
         (image.height(), image.width())
     };
-    let kernels = coefficients(input as usize, output as usize, extent, filter);
+    let kernels = coefficients(input as usize, output as usize, extent, origin, filter);
     let mut result = RgbaImage::new(
         if horizontal { output } else { other },
         if horizontal { other } else { output },
@@ -218,6 +238,45 @@ fn pass(
         }
     }
     result
+}
+fn premultiply(image: &mut RgbaImage) {
+    for p in image.pixels_mut() {
+        for i in 0..3 {
+            let value = u32::from(p[i]) * u32::from(p[3]) + 128;
+            p[i] = (((value >> 8) + value) >> 8) as u8;
+        }
+    }
+}
+fn unpremultiply(image: &mut RgbaImage) {
+    for p in image.pixels_mut() {
+        if p[3] != 0 && p[3] != 255 {
+            for i in 0..3 {
+                p[i] = (u32::from(p[i]) * 255 / u32::from(p[3])).min(255) as u8;
+            }
+        }
+    }
+}
+pub(crate) fn alpha_region(
+    image: &RgbaImage,
+    size: (u32, u32),
+    region: (f32, f32, f32, f32),
+    filter: Filter,
+) -> RgbaImage {
+    let mut image = image.clone();
+    if region == (0.0, 0.0, image.width() as f32, image.height() as f32)
+        && size == image.dimensions()
+    {
+        return image;
+    }
+    premultiply(&mut image);
+    if region.0 != 0.0 || region.2 != image.width() as f32 || size.0 != image.width() {
+        image = pass_region(&image, size.0, region.2 - region.0, region.0, true, filter);
+    }
+    if region.1 != 0.0 || region.3 != image.height() as f32 || size.1 != image.height() {
+        image = pass_region(&image, size.1, region.3 - region.1, region.1, false, filter);
+    }
+    unpremultiply(&mut image);
+    image
 }
 fn reduce(image: &RgbaImage, fx: u32, fy: u32) -> RgbaImage {
     let mut result = RgbaImage::new(image.width().div_ceil(fx), image.height().div_ceil(fy));
@@ -309,12 +368,7 @@ pub(crate) fn thumbnail_region(
         return result;
     }
     if alpha {
-        for p in image.pixels_mut() {
-            for i in 0..3 {
-                let value = u32::from(p[i]) * u32::from(p[3]) + 128;
-                p[i] = (((value >> 8) + value) >> 8) as u8;
-            }
-        }
+        premultiply(&mut image);
     }
     let (fx, fy) = if alpha {
         (1, 1)
@@ -343,13 +397,7 @@ pub(crate) fn thumbnail_region(
         }
     }
     if alpha {
-        for p in image.pixels_mut() {
-            if p[3] != 0 && p[3] != 255 {
-                for i in 0..3 {
-                    p[i] = (u32::from(p[i]) * 255 / u32::from(p[3])).min(255) as u8;
-                }
-            }
-        }
+        unpremultiply(&mut image);
     }
     if matches!(channels, Channels::Opaque) {
         for p in image.pixels_mut() {

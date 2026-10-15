@@ -1,0 +1,77 @@
+{
+  "provenance": "Current Pillow12.3.0 RGBA thumbnail Lanczos; existing input bytes unchanged",
+  "cases": [
+    {
+      "input": "rgba",
+      "bounds": [
+        24,
+        12
+      ],
+      "size": [
+        17,
+        11
+      ],
+      "sha256": "f7df744689aa4dc74d97f3e85a229e6b5616525e87f36f78fa21219fbe225d71"
+    },
+    {
+      "input": "rgba",
+      "bounds": [
+        7,
+        7
+      ],
+      "size": [
+        7,
+        5
+      ],
+      "sha256": "51e3d64f3d81c5884001cdbb20b684b71688b12ebf579195fcfdbb21d897cdc5"
+    },
+    {
+      "input": "rgba",
+      "bounds": [
+        1000,
+        1000
+      ],
+      "size": [
+        17,
+        11
+      ],
+      "sha256": "f7df744689aa4dc74d97f3e85a229e6b5616525e87f36f78fa21219fbe225d71"
+    },
+    {
+      "input": "branding-0",
+      "bounds": [
+        24,
+        12
+      ],
+      "size": [
+        12,
+        12
+      ],
+      "sha256": "b6337ebc8339fe58cdf6362a971488ac9d6a1680a5bc885580fb8b71f4865f30"
+    },
+    {
+      "input": "branding-0",
+      "bounds": [
+        7,
+        7
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "sha256": "438e1c61a53cb6cb00aa13ce1ba85ac684ce09889504cfb5e163e2425e171f66"
+    },
+    {
+      "input": "branding-0",
+      "bounds": [
+        1000,
+        1000
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "51cfc6b836bddf088aa0767955a5c719e4bba237a033d42a3d8522bc69e7e93a"
+    }
+  ]
+}

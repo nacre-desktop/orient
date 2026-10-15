@@ -8,7 +8,9 @@ mod preview;
 mod rgba;
 pub use preview::rgb_preview_png;
 pub use resample::Filter;
-pub use rgba::{blur_rgba, encode_rgba_png, resize_rgba};
+pub use rgba::{
+    blur_rgba, encode_rgba_png, load_rgba, resize_rgba, resize_rgba_region, thumbnail_rgba,
+};
 mod resample;
 pub use artwork::artwork_png;
 pub use decoder::{frames, is_video, still, subprocess, MAX_PIXELS};

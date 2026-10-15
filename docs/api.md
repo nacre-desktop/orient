@@ -85,3 +85,11 @@ They accept `image::RgbaImage` buffers, write no files and have no desktop
 dependencies. Bounds are nonzero and at most 50 megapixels, compression is 0–9,
 and blur radius is finite within 0–1000. Resizing does not perform thumbnail
 pre-reduction. Existing image decoding and RGB preview contracts are unchanged.
+
+`load_rgba(path)` reads the full first frame without EXIF transposition or a
+profile transform, matching Pillow's raw RGBA conversion, including GIF palette
+transparency and 16-bit grayscale clamping. `thumbnail_rgba` keeps a generated
+image within rectangular bounds without upscaling. `resize_rgba_region` resamples
+a fractional source rectangle directly, preserving the crop coordinates used by
+`ImageOps.fit`; rounding that rectangle to integer pixels changes the result.
+These operations share the same pixel bound and write no files.

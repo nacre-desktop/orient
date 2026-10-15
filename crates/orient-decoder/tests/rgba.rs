@@ -95,3 +95,119 @@ fn invalid_rgba_bounds_radius_and_compression_fail_without_output() {
         assert!(orient_decoder::blur_rgba(&image, radius).is_err());
     }
 }
+
+#[test]
+fn fractional_rgba_regions_match_separately_frozen_pillow_pixels() -> Result<()> {
+    let inputs: Value =
+        serde_json::from_str(include_str!("fixtures/rgba-operations-reference.json"))?;
+    let fixture: Value = serde_json::from_str(include_str!("fixtures/rgba-region-reference.json"))?;
+    for case in fixture["cases"].as_array().ok_or("Missing region cases")? {
+        let input = &inputs["inputs"][case["input"].as_str().ok_or("Missing input name")?];
+        let image = image::RgbaImage::from_raw(
+            input["size"][0].as_u64().unwrap() as u32,
+            input["size"][1].as_u64().unwrap() as u32,
+            decode(input["rgba"].as_str().ok_or("Missing input pixels")?),
+        )
+        .ok_or("Bad input image")?;
+        let array = case["box"].as_array().ok_or("Missing rectangle")?;
+        let value = |i: usize| array[i].as_f64().ok_or("Invalid rectangle coordinate");
+        let result = orient_decoder::resize_rgba_region(
+            &image,
+            (24, 12),
+            (value(0)?, value(1)?, value(2)?, value(3)?),
+            if case["filter"] == "LANCZOS" {
+                Filter::Lanczos
+            } else {
+                Filter::Bicubic
+            },
+        )?;
+        let expected = decode(case["rgba"].as_str().ok_or("Missing expected pixels")?);
+        assert!(
+            result.as_raw() == &expected,
+            "Fractional region mismatch: {} {} {}: {} samples",
+            case["input"],
+            case["filter"],
+            case["box"],
+            result
+                .as_raw()
+                .iter()
+                .zip(&expected)
+                .filter(|(a, b)| a != b)
+                .count()
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn full_resolution_raw_rgba_matches_all_frozen_source_images() -> Result<()> {
+    use sha2::{Digest, Sha256};
+    let reference: Value = serde_json::from_str(include_str!("fixtures/raw-rgba-reference.json"))?;
+    let inputs =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/parity/decoder/input");
+    for case in reference["cases"]
+        .as_array()
+        .ok_or("Missing full decode cases")?
+    {
+        let name = case["input"].as_str().ok_or("Missing input")?;
+        let pixels = orient_decoder::load_rgba(&inputs.join(name))?;
+        assert_eq!(
+            pixels.dimensions(),
+            (
+                case["size"][0].as_u64().unwrap() as u32,
+                case["size"][1].as_u64().unwrap() as u32
+            ),
+            "{name}"
+        );
+        assert_eq!(
+            format!("{:x}", Sha256::digest(pixels.as_raw())),
+            case["sha256"],
+            "{name}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn rgba_thumbnails_preserve_frozen_aspect_rounding_and_pixels() -> Result<()> {
+    use sha2::{Digest, Sha256};
+    let inputs: Value =
+        serde_json::from_str(include_str!("fixtures/rgba-operations-reference.json"))?;
+    let fixture: Value =
+        serde_json::from_str(include_str!("fixtures/rgba-thumbnail-reference.json"))?;
+    for case in fixture["cases"]
+        .as_array()
+        .ok_or("Missing thumbnail cases")?
+    {
+        let input = &inputs["inputs"][case["input"].as_str().ok_or("Missing input name")?];
+        let image = image::RgbaImage::from_raw(
+            input["size"][0].as_u64().unwrap() as u32,
+            input["size"][1].as_u64().unwrap() as u32,
+            decode(input["rgba"].as_str().ok_or("Missing input pixels")?),
+        )
+        .ok_or("Bad input image")?;
+        let result = orient_decoder::thumbnail_rgba(
+            &image,
+            (
+                case["bounds"][0].as_u64().unwrap() as u32,
+                case["bounds"][1].as_u64().unwrap() as u32,
+            ),
+            Filter::Lanczos,
+        )?;
+        assert_eq!(
+            result.dimensions(),
+            (
+                case["size"][0].as_u64().unwrap() as u32,
+                case["size"][1].as_u64().unwrap() as u32
+            )
+        );
+        assert_eq!(
+            format!("{:x}", Sha256::digest(result.as_raw())),
+            case["sha256"],
+            "{} {}",
+            case["input"],
+            case["bounds"]
+        );
+    }
+    Ok(())
+}

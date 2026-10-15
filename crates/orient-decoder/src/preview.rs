@@ -8,7 +8,7 @@ use crate::{
 };
 use image::{DynamicImage, ImageDecoder, ImageFormat, ImageReader, Rgba, RgbaImage};
 use std::{fs, path::Path};
-fn dimensions(width: u32, height: u32, bounds: (u32, u32)) -> (u32, u32) {
+pub(crate) fn dimensions(width: u32, height: u32, bounds: (u32, u32)) -> (u32, u32) {
     if width <= bounds.0 && height <= bounds.1 {
         return (width, height);
     }
@@ -37,7 +37,7 @@ fn dimensions(width: u32, height: u32, bounds: (u32, u32)) -> (u32, u32) {
         (bounds.0, closest(f64::from(bounds.0) / aspect, false))
     }
 }
-fn opaque(image: DynamicImage, cmyk: bool) -> RgbaImage {
+pub(crate) fn opaque(image: DynamicImage, cmyk: bool) -> RgbaImage {
     match image {
         DynamicImage::ImageLuma16(image) => {
             RgbaImage::from_fn(image.width(), image.height(), |x, y| {
@@ -131,6 +131,57 @@ pub(crate) fn blur(mut image: RgbaImage, radius: f32) -> RgbaImage {
     }
     RgbaImage::from_fn(image.height(), image.width(), |x, y| image[(y, x)])
 }
+pub(crate) fn decode_source(
+    path: &Path,
+    format: Option<ImageFormat>,
+    decoder: impl ImageDecoder,
+) -> Result<(DynamicImage, bool)> {
+    let result = if format == Some(ImageFormat::Jpeg) {
+        let packed = crate::jpeg::decode_packed(path, usize::MAX, true)?
+            .ok_or("Unsupported JPEG colorspace")?;
+        let image = if packed.cmyk {
+            DynamicImage::ImageRgba8(
+                RgbaImage::from_raw(packed.width, packed.height, packed.pixels)
+                    .ok_or("Invalid JPEG dimensions")?,
+            )
+        } else {
+            DynamicImage::ImageRgb8(
+                image::RgbImage::from_raw(packed.width, packed.height, packed.pixels)
+                    .ok_or("Invalid JPEG dimensions")?,
+            )
+        };
+        (image, packed.cmyk)
+    } else {
+        (DynamicImage::from_decoder(decoder)?, false)
+    };
+    Ok(result)
+}
+pub(crate) fn restore_gif(image: &mut DynamicImage, original: &[u8]) -> Result<Option<Vec<u8>>> {
+    let mut transparency = None;
+    let mut options = gif::DecodeOptions::new();
+    options.set_color_output(gif::ColorOutput::Indexed);
+    let mut gif = options.read_info(std::io::Cursor::new(original))?;
+    let global = gif.global_palette().map(<[u8]>::to_vec);
+    if let Some(frame) = gif.read_next_frame()? {
+        if let Some(index) = frame.transparent {
+            if let Some(palette) = frame.palette.as_ref().or(global.as_ref()) {
+                if let Some(color) = palette.get(usize::from(index) * 3..usize::from(index) * 3 + 3)
+                {
+                    transparency = Some(color.iter().flat_map(|c| [0, *c]).collect());
+                    let mut rgba = image.to_rgba8();
+                    // GIF decoder canvases may clear transparent RGB. Pillow
+                    // retains the palette color, including outside an offset frame.
+                    for pixel in rgba.pixels_mut().filter(|pixel| pixel[3] == 0) {
+                        pixel.0[..3].copy_from_slice(color);
+                    }
+                    *image = DynamicImage::ImageRgba8(rgba);
+                }
+            }
+        }
+    }
+
+    Ok(transparency)
+}
 /// Read a bounded image, apply EXIF orientation, convert RGB before bicubic
 /// thumbnailing, and optionally blur with Pillow's three-pass box approximation.
 /// Returns PNG bytes with ICC/transparency preserved; no files are written.
@@ -151,48 +202,10 @@ pub fn rgb_preview_png(path: &Path, bounds: (u32, u32), radius: f32) -> Result<V
     } else {
         None
     };
-    let (mut image, cmyk) = if format == Some(ImageFormat::Jpeg) {
-        let packed = crate::jpeg::decode_packed(path, usize::MAX, true)?
-            .ok_or("Unsupported JPEG colorspace")?;
-        let image = if packed.cmyk {
-            DynamicImage::ImageRgba8(
-                RgbaImage::from_raw(packed.width, packed.height, packed.pixels)
-                    .ok_or("Invalid JPEG dimensions")?,
-            )
-        } else {
-            DynamicImage::ImageRgb8(
-                image::RgbImage::from_raw(packed.width, packed.height, packed.pixels)
-                    .ok_or("Invalid JPEG dimensions")?,
-            )
-        };
-        (image, packed.cmyk)
-    } else {
-        (DynamicImage::from_decoder(decoder)?, false)
-    };
+    let (mut image, cmyk) = decode_source(path, format, decoder)?;
     image.apply_orientation(orientation);
     if format == Some(ImageFormat::Gif) {
-        let mut options = gif::DecodeOptions::new();
-        options.set_color_output(gif::ColorOutput::Indexed);
-        let mut gif = options.read_info(std::io::Cursor::new(&original))?;
-        let global = gif.global_palette().map(<[u8]>::to_vec);
-        if let Some(frame) = gif.read_next_frame()? {
-            if let Some(index) = frame.transparent {
-                if let Some(palette) = frame.palette.as_ref().or(global.as_ref()) {
-                    if let Some(color) =
-                        palette.get(usize::from(index) * 3..usize::from(index) * 3 + 3)
-                    {
-                        transparency = Some(color.iter().flat_map(|c| [0, *c]).collect());
-                        let mut rgba = image.to_rgba8();
-                        // GIF decoder canvases may clear transparent RGB. Pillow
-                        // retains the palette color, including outside an offset frame.
-                        for pixel in rgba.pixels_mut().filter(|pixel| pixel[3] == 0) {
-                            pixel.0[..3].copy_from_slice(color);
-                        }
-                        image = DynamicImage::ImageRgba8(rgba);
-                    }
-                }
-            }
-        }
+        transparency = restore_gif(&mut image, &original)?;
     }
     let mut rgba = opaque(image, cmyk);
     let extent = (f64::from(rgba.width()), f64::from(rgba.height()));
