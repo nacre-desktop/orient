@@ -93,3 +93,8 @@ image within rectangular bounds without upscaling. `resize_rgba_region` resample
 a fractional source rectangle directly, preserving the crop coordinates used by
 `ImageOps.fit`; rounding that rectangle to integer pixels changes the result.
 These operations share the same pixel bound and write no files.
+
+For opaque previews, `load_rgba_oriented` applies EXIF orientation before the
+caller converts to RGB; `thumbnail_rgb` retains the integer pre-reduce used by
+Pillow's RGB thumbnail path. `encode_rgb_png` serializes generated RGB pixels
+without metadata. They share the existing codec, resampler and PNG implementation.

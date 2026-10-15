@@ -211,3 +211,70 @@ fn rgba_thumbnails_preserve_frozen_aspect_rounding_and_pixels() -> Result<()> {
     }
     Ok(())
 }
+
+#[test]
+fn rgb_encoding_thumbnailing_and_oriented_loading_match_frozen_pillow() -> Result<()> {
+    use sha2::{Digest, Sha256};
+    let inputs: Value =
+        serde_json::from_str(include_str!("fixtures/rgba-operations-reference.json"))?;
+    let fixture: Value =
+        serde_json::from_str(include_str!("fixtures/rgb-operations-reference.json"))?;
+    let files =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/parity/decoder/input");
+    for case in fixture["cases"].as_array().ok_or("Missing RGB cases")? {
+        let name = case["input"].as_str().ok_or("Missing RGB input")?;
+        if case["operation"] == "oriented" {
+            let image = orient_decoder::load_rgba_oriented(&files.join(name))?;
+            assert_eq!(
+                image.dimensions(),
+                (
+                    case["size"][0].as_u64().unwrap() as u32,
+                    case["size"][1].as_u64().unwrap() as u32
+                ),
+                "{name}"
+            );
+            assert_eq!(
+                format!("{:x}", Sha256::digest(image.as_raw())),
+                case["sha256"],
+                "{name}"
+            );
+            continue;
+        }
+        let input = &inputs["inputs"][name];
+        let rgba = image::RgbaImage::from_raw(
+            input["size"][0].as_u64().unwrap() as u32,
+            input["size"][1].as_u64().unwrap() as u32,
+            decode(input["rgba"].as_str().ok_or("Missing input bytes")?),
+        )
+        .ok_or("Bad input image")?;
+        let image = image::DynamicImage::ImageRgba8(rgba).to_rgb8();
+        if case["operation"] == "encode" {
+            assert!(
+                orient_decoder::encode_rgb_png(&image, 6)? == decode(case["png"].as_str().unwrap()),
+                "RGB PNG mismatch {name}"
+            );
+        } else {
+            let result = orient_decoder::thumbnail_rgb(
+                &image,
+                (
+                    case["bounds"][0].as_u64().unwrap() as u32,
+                    case["bounds"][1].as_u64().unwrap() as u32,
+                ),
+                Filter::Lanczos,
+            )?;
+            assert_eq!(
+                result.dimensions(),
+                (
+                    case["size"][0].as_u64().unwrap() as u32,
+                    case["size"][1].as_u64().unwrap() as u32
+                )
+            );
+            assert!(
+                result.as_raw() == &decode(case["rgb"].as_str().unwrap()),
+                "RGB thumbnail mismatch {name} {}",
+                case["bounds"]
+            );
+        }
+    }
+    Ok(())
+}

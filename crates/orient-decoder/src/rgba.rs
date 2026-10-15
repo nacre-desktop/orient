@@ -11,19 +11,44 @@ fn bounds(width: u32, height: u32) -> Result<()> {
 /// Serialize RGBA pixels with Pillow's scanline filter choices and deflate rounding.
 /// Metadata is intentionally absent: the caller owns the generated pixel buffer.
 pub fn encode_rgba_png(image: &RgbaImage, compression: u8) -> Result<Vec<u8>> {
-    bounds(image.width(), image.height())?;
+    encode_pixels(
+        image.as_raw(),
+        image.width(),
+        image.height(),
+        4,
+        compression,
+    )
+}
+/// Serialize generated RGB artwork with the same bounded Pillow PNG path.
+pub fn encode_rgb_png(image: &image::RgbImage, compression: u8) -> Result<Vec<u8>> {
+    encode_pixels(
+        image.as_raw(),
+        image.width(),
+        image.height(),
+        3,
+        compression,
+    )
+}
+fn encode_pixels(
+    pixels: &[u8],
+    width: u32,
+    height: u32,
+    channels: usize,
+    compression: u8,
+) -> Result<Vec<u8>> {
+    bounds(width, height)?;
     if compression > 9 {
         return Err("Invalid PNG compression level".into());
     }
     let mut output = b"\x89PNG\r\n\x1a\n".to_vec();
-    let mut header = image.width().to_be_bytes().to_vec();
-    header.extend_from_slice(&image.height().to_be_bytes());
-    header.extend_from_slice(&[8, 6, 0, 0, 0]);
+    let mut header = width.to_be_bytes().to_vec();
+    header.extend_from_slice(&height.to_be_bytes());
+    header.extend_from_slice(&[8, if channels == 4 { 6 } else { 2 }, 0, 0, 0]);
     artwork::chunk(&mut output, b"IHDR", &header);
-    let filtered = artwork::filtered_channels(image.as_raw(), image.width() as usize, 4);
+    let filtered = artwork::filtered_channels(pixels, width as usize, channels);
     let data = artwork::compress_level(
         &filtered,
-        Some(image.width() as usize * 4 + 1),
+        Some(width as usize * channels + 1),
         i32::from(compression),
     )?;
     for data in data.chunks(65536) {
@@ -88,16 +113,32 @@ pub fn resize_rgba_region(
 /// Keeps raw EXIF orientation and performs no color-profile transform, matching
 /// Image.open(path).convert("RGBA"). The shared 50-megapixel bound applies.
 pub fn load_rgba(path: &std::path::Path) -> Result<RgbaImage> {
+    load_pixels(path, false)
+}
+/// Decode RGBA and apply EXIF orientation before callers convert/thumbnail it.
+pub fn load_rgba_oriented(path: &std::path::Path) -> Result<RgbaImage> {
+    load_pixels(path, true)
+}
+fn load_pixels(path: &std::path::Path, oriented: bool) -> Result<RgbaImage> {
     use image::{DynamicImage, ImageDecoder, ImageFormat, ImageReader, Rgba};
     let reader = ImageReader::open(path)?.with_guessed_format()?;
     let format = reader.format();
-    let decoder = reader.into_decoder()?;
+    let mut decoder = reader.into_decoder()?;
+    let orientation = if oriented {
+        Some(decoder.orientation()?)
+    } else {
+        None
+    };
     let (width, height) = decoder.dimensions();
     bounds(width, height)?;
     let (mut image, cmyk) = preview::decode_source(path, format, decoder)?;
     if format == Some(ImageFormat::Gif) {
         preview::restore_gif(&mut image, &std::fs::read(path)?)?;
     }
+    if let Some(orientation) = orientation {
+        image.apply_orientation(orientation);
+    }
+    let (width, height) = (image.width(), image.height());
     if cmyk {
         return Ok(preview::opaque(image, true));
     }
@@ -128,4 +169,28 @@ pub fn thumbnail_rgba(image: &RgbaImage, maximum: (u32, u32), filter: Filter) ->
     bounds(maximum.0, maximum.1)?;
     let size = preview::dimensions(image.width(), image.height(), maximum);
     resize_rgba(image, size, filter)
+}
+
+/// RGB thumbnailing retains Pillow's integer pre-reduce before fixed-point resampling.
+pub fn thumbnail_rgb(
+    image: &image::RgbImage,
+    maximum: (u32, u32),
+    filter: Filter,
+) -> Result<image::RgbImage> {
+    bounds(image.width(), image.height())?;
+    bounds(maximum.0, maximum.1)?;
+    let size = preview::dimensions(image.width(), image.height(), maximum);
+    let rgba = image::RgbaImage::from_fn(image.width(), image.height(), |x, y| {
+        let p = image[(x, y)];
+        image::Rgba([p[0], p[1], p[2], 255])
+    });
+    let result = resample::thumbnail_region(
+        rgba,
+        resample::Channels::Opaque,
+        false,
+        size,
+        (f64::from(image.width()), f64::from(image.height())),
+        filter,
+    );
+    Ok(image::DynamicImage::ImageRgba8(result).to_rgb8())
 }

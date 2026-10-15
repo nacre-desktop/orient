@@ -9,7 +9,8 @@ mod rgba;
 pub use preview::rgb_preview_png;
 pub use resample::Filter;
 pub use rgba::{
-    blur_rgba, encode_rgba_png, load_rgba, resize_rgba, resize_rgba_region, thumbnail_rgba,
+    blur_rgba, encode_rgb_png, encode_rgba_png, load_rgba, load_rgba_oriented, resize_rgba,
+    resize_rgba_region, thumbnail_rgb, thumbnail_rgba,
 };
 mod resample;
 pub use artwork::artwork_png;
