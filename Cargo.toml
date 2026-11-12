@@ -3,7 +3,7 @@ members = ["crates/orient-core", "crates/orient-py", "crates/orient-cli", "crate
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0-dev.6"
+version = "0.1.0-dev.7"
 edition = "2021"
 rust-version = "1.85"
 license = "MIT"

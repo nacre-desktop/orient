@@ -3,7 +3,7 @@
 <p align="center">Wallpaper colors. Readable palettes. Themes anywhere.</p>
 <p align="center"><a href="#use-orient-in-your-setup">Get started</a> · <a href="#what-it-does">Features</a> · <a href="#using-palettes-and-templates">Templates</a> · <a href="https://github.com/nacre-desktop/nacre">Nacre</a></p>
 
-**Development preview · 0.1.0-dev.6 (source only).** The engine works and has regression tests;
+**Development preview · 0.1.0-dev.7 (source only).** The engine works and has regression tests;
 its public packaging/API is being stabilized before a 1.0 release.
 
 Orient is a Rust color engine with a Python library and a standalone CLI. It analyzes images or sampled
@@ -38,7 +38,7 @@ orient --help
 
 The source checkout contains all bundled templates, and the binary embeds them.
 Keep the checkout if you want to edit a template or render an individual bundled
-file. The binary alone can export all built-ins. Source-only dev6 has no new
+file. The binary alone can export all built-ins. Source-only dev7 has no new
 release artifacts; the [Arch recipes](packaging/arch/) also build from source.
 Image decoding supports PNG, JPEG, WebP, GIF, BMP and TIFF. See the
 [decoder contract](tests/parity/decoder/README.md) for exact parity coverage.

@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased — 0.1.0-dev.6
+## Unreleased — 0.1.0-dev.7
+
+- Add Pillow-compatible RGB preview PNGs and exact RGBA artwork operations for
+  native consumers. Expose raw RGBA decoding and fractional crops, then share
+  oriented RGB previews and PNG encoding for consistent native output.
 
 - Add themes for Ghostty, WezTerm, niri, Waybar, mako, SwayNC, fuzzel, Helix,
   Zed, Starship, tmux, fish, Zathura, qt5ct/qt6ct, Hyprlock, Dunst, Yazi,

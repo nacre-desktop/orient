@@ -24,7 +24,7 @@ current sdist artifact digest and substitutes that snapshot into a temporary
 recipe. The native Arch workflow can publish this exact Git-pinned package independently
 of Python release archives; inspect its source receipt when downloading a build.
 
-PyPI uses `0.1.0.dev6`; Arch uses `0.1.0dev6` so it sorts before final `0.1.0`.
+PyPI uses `0.1.0.dev7`; Arch uses `0.1.0dev7` so it sorts before final `0.1.0`.
 The recipe has not been submitted to the AUR or an official repository. Regenerate
 `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO` after recipe changes.
 
