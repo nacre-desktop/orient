@@ -3,6 +3,8 @@
 <p align="center">Wallpaper colors. Readable palettes. Themes anywhere.</p>
 <p align="center"><a href="#use-orient-in-your-setup">Get started</a> · <a href="#what-it-does">Features</a> · <a href="#using-palettes-and-templates">Templates</a> · <a href="https://github.com/nacre-desktop/nacre">Nacre</a></p>
 
+<p align="center"><img src="docs/images/orient-wallpaper-palette.png" width="960" alt="Nacre forest wallpaper beside the dark semantic palette extracted by Orient"><br><em>Orient extracts a semantic palette from Nacre’s forest demo wallpaper.</em></p>
+
 **Development preview · 0.1.0-dev.7 (source only).** The engine works and has regression tests;
 its public packaging/API is being stabilized before a 1.0 release.
 
