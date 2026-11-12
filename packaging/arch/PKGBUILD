@@ -1,6 +1,6 @@
 # Maintainer: siverteh <92440237+Siverteh@users.noreply.github.com>
 pkgbase=orient
-pkgname=('orient' 'python-orient-colors')
+pkgname=('orient')
 pkgver=0.1.0dev7
 _pyver=0.1.0.dev7
 pkgrel=1
@@ -11,9 +11,10 @@ license=('MIT')
 # GCC LTO archives cannot be consumed by Rust's LLVM linker. Cargo retains its
 # own release optimization; only makepkg's cross-language LTO flags are disabled.
 options=('!lto')
-depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
+# The Python package and its Pillow-parity suites ship through PyPI and Orient's CI;
+# the Arch release carries only the native engine, checked against its frozen goldens.
 makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git' 'cmake')
-checkdepends=('ffmpeg')
+checkdepends=('ffmpeg' 'python' 'python-pillow')
 optdepends=('ffmpeg: video frame sampling')
 _revision=5cea76bf9c3685548f12ecc6b704693e8b613013
 _srcdir=orient
@@ -28,24 +29,12 @@ build() {
 
 check() {
   cd "$_srcdir"
-  # Install without network into an isolated prefix, then exercise the entry point
-  # and package data rather than falling back to the source checkout.
+  # The wheel is installed only to drive the native golden comparison.
   python -m venv --system-site-packages "${srcdir}/smoke-venv"
   "${srcdir}/smoke-venv/bin/python" -m installer dist/*.whl
   cargo test --locked --quiet
   target/release/orient --version
   "${srcdir}/smoke-venv/bin/python" tests/parity/check_native_golden.py -q
-  "${srcdir}/smoke-venv/bin/python" -m unittest discover -s tests
-  "${srcdir}/smoke-venv/bin/python" tests/parity/check_golden.py -q
-  "${srcdir}/smoke-venv/bin/python" -I scripts/smoke_wheel.py \
-    "$PWD/tests/orient-gallery/images/coast-day.png" --version "$_pyver"
-}
-
-package_python-orient-colors() {
-  depends=('python>=3.13' 'python-pillow>=11' 'python-pillow<13')
-  cd "$_srcdir"
-  python -m installer --destdir="$pkgdir" dist/*.whl
-  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
 
 package_orient() {

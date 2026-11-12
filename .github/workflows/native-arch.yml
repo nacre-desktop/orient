@@ -39,7 +39,7 @@ jobs:
             chown -R builder:builder /work
             cd /work
             sudo -u builder extra-x86_64-build 2>&1 | tee build.log
-            namcap orient-[0-9]*.pkg.tar.zst python-orient-colors-[0-9]*.pkg.tar.zst > namcap.log 2>&1
+            namcap orient-[0-9]*.pkg.tar.zst > namcap.log 2>&1
             bsdtar -xOf orient-[0-9]*.pkg.tar.zst .PKGINFO > package-info
           '
           # The builder UID differs from the GitHub runner UID. Return only the

@@ -1,20 +1,19 @@
 # Arch Linux packages
 
-The split recipe provides `orient` (standalone Rust command, no Python runtime)
-and `python-orient-colors` (Python library plus `python -m orient`, with Pillow).
-Install both for callers needing both interfaces. Nacre's native engine
-dependency is `orient`; it no longer needs the Python Orient library. Wheels no longer install a competing `orient` console script.
+The recipe provides `orient`, the standalone Rust command with no Python runtime.
+It is Nacre's native engine dependency. The Python library (`python -m orient`)
+is published on PyPI. Its parity with Pillow is pinned to Pillow 11–12 and tested
+in Orient's CI, so it is not shipped as an Arch package: Arch now carries Pillow 13.
 
-Both packages support x86_64 and aarch64. Builds use Rust, LCMS2 and
-PEP 517/maturin; Python installation uses `python-installer`. FFmpeg is optional
-at runtime and required for video tests. No pip command runs in the package
-build and no desktop session is required.
+The package supports x86_64 and aarch64. The build uses Rust and LCMS2, and builds
+the wheel with PEP 517/maturin only to check the native engine against its frozen
+goldens. FFmpeg is optional at runtime and required for video tests. No pip command
+runs in the package build and no desktop session is required.
 
 ```sh
 extra-x86_64-build
-sudo pacman -U ./orient-*.pkg.tar.zst ./python-orient-colors-*.pkg.tar.zst
+sudo pacman -U ./orient-*.pkg.tar.zst
 orient --version
-python -m orient --version
 ```
 
 Devtools needs sudo to create its stock-Arch clean chroot; CI hosts it in a

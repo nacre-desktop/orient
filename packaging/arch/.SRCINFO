@@ -7,6 +7,8 @@ pkgbase = orient
 	arch = aarch64
 	license = MIT
 	checkdepends = ffmpeg
+	checkdepends = python
+	checkdepends = python-pillow
 	makedepends = python-build
 	makedepends = python-installer
 	makedepends = rust
@@ -14,9 +16,6 @@ pkgbase = orient
 	makedepends = lcms2
 	makedepends = git
 	makedepends = cmake
-	depends = python>=3.13
-	depends = python-pillow>=11
-	depends = python-pillow<13
 	optdepends = ffmpeg: video frame sampling
 	options = !lto
 	source = orient::git+https://github.com/nacre-desktop/orient.git#commit=5cea76bf9c3685548f12ecc6b704693e8b613013
@@ -33,8 +32,3 @@ pkgname = orient
 	depends = glibc
 	depends = gcc-libs
 	optdepends = ffmpeg: video frame sampling
-
-pkgname = python-orient-colors
-	depends = python>=3.13
-	depends = python-pillow>=11
-	depends = python-pillow<13
