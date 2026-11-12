@@ -1,6 +1,6 @@
 pkgbase = orient
 	pkgdesc = Wallpaper colors, readable palettes and portable theme templates
-	pkgver = 0.1.0dev6
+	pkgver = 0.1.0dev7
 	pkgrel = 1
 	url = https://github.com/nacre-desktop/orient
 	arch = x86_64
@@ -19,7 +19,7 @@ pkgbase = orient
 	depends = python-pillow<13
 	optdepends = ffmpeg: video frame sampling
 	options = !lto
-	source = orient::git+https://github.com/nacre-desktop/orient.git#commit=17bf36efc7f6e85c2ded2ce4b7bd4cda4ea659b5
+	source = orient::git+https://github.com/nacre-desktop/orient.git#commit=5cea76bf9c3685548f12ecc6b704693e8b613013
 	sha256sums = SKIP
 
 pkgname = orient
