@@ -4,6 +4,8 @@
 <p align="center"><a href="#use-orient-in-your-setup">Get started</a> · <a href="#what-it-does">Features</a> · <a href="#using-palettes-and-templates">Templates</a> · <a href="https://github.com/nacre-desktop/nacre">Nacre</a></p>
 
 <p align="center"><img src="docs/images/orient-wallpaper-palette.png" width="960" alt="Nacre forest wallpaper beside the dark semantic palette extracted by Orient"><br><em>Orient extracts a semantic palette from Nacre’s forest demo wallpaper.</em></p>
+<!-- media: media/orient-hero.gif — terminal: orient palette forest.jpg --personality natural | jq .colours.primary; then --personality pop; then orient export palette.json themes-dark && ls themes-dark -->
+<!-- media (extra): media/orient-personalities.png — one wallpaper, eight personalities, dark row and light row -->
 
 **Development preview · 0.1.0-dev.7 (source only).** The engine works and has regression tests;
 its public packaging/API is being stabilized before a 1.0 release.
@@ -69,6 +71,8 @@ Harmony, Pop, Mist, Vivid, Pearl and Tide (use lowercase CLI names). `--mode` is
 backgrounds. Generated palette JSON uses `formatVersion: 1` and carries its input
 settings. It also contains the source image path, so review metadata before
 sharing it.
+
+Every subcommand and flag: [CLI reference](docs/cli.md).
 
 Export writes files; it does not install themes, run hooks, or reload applications.
 Use a fresh staging directory for each export, inspect the result, and copy or
@@ -283,6 +287,19 @@ general {
 Render it with `orient render palette.json borders.conf.in > borders.conf`,
 inspect it, and use a `source = …/borders.conf` entry in your existing Hyprlang
 config. Choose the example that matches your installed compositor's config API.
+
+## How the family fits together
+
+```text
+nacre-niri   compositor (niri fork): windows, workspaces, collections, lock
+   ├── nacre        the desktop: bar, launcher, panels, settings, daemon, installer
+   │     ├── bead   the shell framework the UI is written with (Rust + Luau, MIT)
+   │     └── orient the colour engine that turns a wallpaper into a palette (MIT)
+   └── clasp        the login and lock screen (greetd), also built on Bead
+```
+
+Orient is the engine. Nacre publishes the palette; Bead and Clasp read the
+published `palette.json`. Nothing in Orient depends on any of them.
 
 ## Python library
 
