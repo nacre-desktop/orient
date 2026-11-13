@@ -179,8 +179,11 @@ fn gif(path: &Path) -> Result<Vec<Frame>> {
     Ok(result)
 }
 /// Concurrent pipe reads prevent deadlock; timeout kills and reaps the whole group.
+/// The own process group is a background group on the caller's terminal, so it must
+/// never get the terminal as stdin: a read there stops the child (SIGTTIN) until the timeout.
 pub fn subprocess(command: &mut Command, timeout: Duration) -> Result<Vec<u8>> {
     let mut child = command
+        .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .process_group(0)
@@ -311,7 +314,7 @@ fn video(path: &Path) -> Result<Vec<Frame>> {
         let target = folder.path().join(format!("{i}.png"));
         subprocess(
             Command::new("ffmpeg")
-                .args(["-v", "error", "-ss"])
+                .args(["-nostdin", "-v", "error", "-ss"])
                 .arg((duration * fraction).min(last).to_string())
                 .arg("-i")
                 .arg(path)
@@ -381,6 +384,14 @@ mod tests {
             assert!(Instant::now() < deadline, "descendant is still running");
             thread::sleep(Duration::from_millis(5));
         }
+    }
+    #[test]
+    fn child_stdin_is_never_the_callers_terminal() {
+        let out = subprocess(
+            Command::new("readlink").arg("/proc/self/fd/0"),
+            Duration::from_secs(5),
+        );
+        assert_eq!(String::from_utf8(out.unwrap()).unwrap().trim(), "/dev/null");
     }
     #[test]
     fn deadline_covers_pipes_after_parent_exit() {
