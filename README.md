@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/branding/nacre-avatar-transparent.png" width="140" alt="Mother-of-pearl shell logo"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/branding/orient-horizontal-dark.svg"><img src="assets/branding/orient-horizontal.svg" width="300" alt="Orient logo"></picture></p>
 <h1 align="center">Orient</h1>
 <p align="center">Wallpaper colors. Readable palettes. Themes anywhere.</p>
 <p align="center"><a href="#use-orient-in-your-setup">Get started</a> · <a href="#what-it-does">Features</a> · <a href="#using-palettes-and-templates">Templates</a> · <a href="https://github.com/nacre-desktop/nacre">Nacre</a></p>
