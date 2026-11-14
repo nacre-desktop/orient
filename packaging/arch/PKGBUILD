@@ -16,7 +16,7 @@ options=('!lto')
 makedepends=('python-build' 'python-installer' 'rust' 'python-maturin' 'lcms2' 'git' 'cmake')
 checkdepends=('ffmpeg' 'python' 'python-pillow')
 optdepends=('ffmpeg: video frame sampling')
-_revision=5cea76bf9c3685548f12ecc6b704693e8b613013
+_revision=d2cf2dad5bd9590121676cc5332052c523795718
 _srcdir=orient
 source=("orient::git+${url}.git#commit=${_revision}")
 sha256sums=('SKIP')
