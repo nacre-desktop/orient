@@ -121,7 +121,9 @@ jobs:
             gpg --batch --local-user "$fingerprint" --detach-sign "$metadata"
           done
           version=$(python -c 'import json; print(json.load(open("release.json"))["version"])')
-          revision=$(python -c 'import json; print(json.load(open("release.json"))["sourceRevision"])')
+          # Tag the tested recipe commit (this run's main), not the older engine commit: a new tag on a commit whose
+          # workflows differ from the default branch needs the workflows permission, which GITHUB_TOKEN never has (HTTP 403).
+          revision=$(python -c 'import json; print(json.load(open("release.json"))["recipeRevision"])')
           tag="arch-$version"
           if gh release view "$tag" >/dev/null 2>&1; then
             echo 'Release already exists; refusing to replace immutable archives. Download that release instead.' >&2

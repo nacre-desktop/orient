@@ -37,9 +37,13 @@ Dispatch with `publish=true` to sign these same passing artifacts and create an
 immutable `arch-PKGVER-PKGREL` GitHub prerelease. A rerun cannot overwrite an
 existing release. The native Arch release is independent of Python/PyPI publishing;
 no PyPI environment approval is bypassed.
+The tag goes on the tested recipe commit (`recipeRevision`), not the engine commit
+(`sourceRevision`, still in `release.json`): GITHUB_TOKEN cannot create a tag on a
+commit whose `.github/workflows` files differ from main's (HTTP 403).
 
 The public signing key is in `packaging/keys`; only an expiring signing subkey is
-available to the publication job through `ARCH_REPO_SIGNING_KEY`. Recovery and
+available to the publication job through `ARCH_REPO_SIGNING_KEY`, a secret of the
+`arch-signing` environment (main only; the owner approves each run). Recovery and
 certification keys stay outside GitHub and the repository. Signing happens only
 on main, after package and runtime checks succeed, in a separate job.
 
