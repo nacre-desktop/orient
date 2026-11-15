@@ -86,6 +86,8 @@ jobs:
     if: inputs.publish && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
+    # The signing key is an arch-signing environment secret: main only, the owner approves each run.
+    environment: arch-signing
     permissions:
       contents: write
     steps:
