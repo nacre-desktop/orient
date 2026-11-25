@@ -35,7 +35,7 @@ names alone do not enforce approval. Never approve production through automation
 5. During experimental development, validate and integrate directly into current
    `main`, push normally, and check CI. Include validation evidence and the Arch
    name `python-orient-colors` in the packaging handoff. Use a PR only when
-   explicitly requested, as described in CONTRIBUTING.
+   explicitly requested.
 
 ## Publish
 
